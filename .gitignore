@@ -30,5 +30,7 @@ pyresparser/__pycache__/
 *.sqlite3
 
 .streamlit/secrets.toml
+RESUME ANALYSER SYNOPSIS.pdf
+screenshots/
 !.env.example
 !App/.env.example

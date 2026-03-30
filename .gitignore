@@ -32,5 +32,4 @@ pyresparser/__pycache__/
 .streamlit/secrets.toml
 RESUME ANALYSER SYNOPSIS.pdf
 screenshots/
-!.env.example
-!App/.env.example
+App/.env.example

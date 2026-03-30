@@ -130,8 +130,9 @@ DB_NAME=your_database
 DB_USER=your_user
 DB_PASSWORD=your_password
 HF_TOKEN=optional_huggingface_token
-ADMIN_USERNAME=Ramu
-ADMIN_PASSWORD=Ram123
+ADMIN_USERNAME=your_admin_username
+ADMIN_PASSWORD=your_admin_password
+ADMIN_CREDENTIALS=admin_one:password_one,admin_two:password_two
 ```
 
 ## Run the App 🚀
@@ -197,7 +198,7 @@ python3 -m py_compile App/App.py App/parser_utils.py App/matching_utils.py App/r
 - The parser now uses a hybrid strategy: custom text extraction first, optional `pyresparser` support second.
 - Semantic matching works best when the embedding model can load successfully.
 - Uploaded resumes and local env files should remain untracked.
-- Admin console credentials are controlled through `ADMIN_USERNAME` and `ADMIN_PASSWORD`.
+- Admin console access should be configured locally through `ADMIN_CREDENTIALS`, or through the fallback `ADMIN_USERNAME` and `ADMIN_PASSWORD` pair.
 
 ## Git Hygiene
 

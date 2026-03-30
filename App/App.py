@@ -561,6 +561,28 @@ def get_env_or_default(name, default_value):
     return value if value else default_value
 
 
+def parse_admin_credentials():
+    raw_credentials = os.getenv('ADMIN_CREDENTIALS', '').strip()
+    if raw_credentials:
+        credentials = {}
+        for pair in raw_credentials.split(','):
+            if ':' not in pair:
+                continue
+            username, password = pair.split(':', 1)
+            username = username.strip()
+            password = password.strip()
+            if username and password:
+                credentials[username] = password
+        if credentials:
+            return credentials
+
+    primary_username = os.getenv('ADMIN_USERNAME', '').strip()
+    primary_password = os.getenv('ADMIN_PASSWORD', '').strip()
+    if primary_username and primary_password:
+        return {primary_username: primary_password}
+    return {}
+
+
 # PostgreSQL connector
 connection = psycopg2.connect(
     host=get_required_env('DB_HOST'),
@@ -570,8 +592,7 @@ connection = psycopg2.connect(
     password=get_required_env('DB_PASSWORD')
 )
 cursor = connection.cursor()
-ADMIN_USERNAME = get_env_or_default('ADMIN_USERNAME', 'Ramu')
-ADMIN_PASSWORD = get_env_or_default('ADMIN_PASSWORD', 'Ram123')
+ADMIN_CREDENTIALS = parse_admin_credentials()
 
 
 # inserting miscellaneous data, fetched results, prediction and recommendation into user_data table
@@ -1034,9 +1055,12 @@ def run():
                 st.markdown(section_card("Secure access", "Enter admin credentials to open the analytics workspace."), unsafe_allow_html=True)
                 ad_user = st.text_input("Username", key="admin_username")
                 ad_password = st.text_input("Password", type='password', key="admin_password")
+                if not ADMIN_CREDENTIALS:
+                    st.warning("Admin credentials are not configured. Add them in `App/.env` before using the console.")
                 if st.button('Open Admin Console', use_container_width=True):
-                    if ad_user == ADMIN_USERNAME and ad_password == ADMIN_PASSWORD:
+                    if ADMIN_CREDENTIALS.get(ad_user) == ad_password:
                         st.session_state.admin_authenticated = True
+                        st.session_state.admin_username = ad_user
                         st.rerun()
                     else:
                         st.error("Wrong ID and password provided.")
@@ -1061,9 +1085,11 @@ def run():
             with admin_action_col1:
                 if st.button("Logout", use_container_width=True):
                     st.session_state.admin_authenticated = False
+                    st.session_state.admin_username = None
                     st.rerun()
             with admin_action_col2:
-                st.success(f"Welcome {ADMIN_USERNAME}. The analytics workspace is ready.")
+                active_admin = st.session_state.get("admin_username", "Admin")
+                st.success(f"Welcome {active_admin}. The analytics workspace is ready.")
 
             cursor.execute('''SELECT ID, ip_add, resume_score, Predicted_Field::TEXT, User_level::TEXT, city, state, country from user_data''')
             datanalys = cursor.fetchall()

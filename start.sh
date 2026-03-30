@@ -2,4 +2,4 @@
 set -euo pipefail
 
 cd App
-exec streamlit run App.py --server.address 0.0.0.0 --server.port "${PORT:-8501}"
+exec python3 -m streamlit run App.py --server.address 0.0.0.0 --server.port "${PORT:-8501}"

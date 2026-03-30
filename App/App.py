@@ -8,10 +8,12 @@ import pandas as pd
 import base64, random
 import time,datetime
 import psycopg2
+import sqlite3
 import html
 import os
 import socket
 import platform
+import getpass
 import geocoder
 import secrets
 import io,random
@@ -32,7 +34,11 @@ from parser_utils import parse_resume_document
 from resume_analysis_core import build_full_analysis, build_pdf_report_bytes
 from ui_styles import hero_section, info_card, render_app_styles, section_card
 import nltk
-nltk.download('stopwords')
+
+try:
+    nltk.download('stopwords', quiet=True)
+except Exception:
+    pass
 
 
 ###### Preprocessing functions ######
@@ -561,6 +567,10 @@ def get_env_or_default(name, default_value):
     return value if value else default_value
 
 
+def env_is_configured(*names):
+    return all(os.getenv(name) for name in names)
+
+
 def parse_admin_credentials():
     raw_credentials = os.getenv('ADMIN_CREDENTIALS', '').strip()
     if raw_credentials:
@@ -583,15 +593,56 @@ def parse_admin_credentials():
     return {}
 
 
-# PostgreSQL connector
-connection = psycopg2.connect(
-    host=get_required_env('DB_HOST'),
-    port=get_required_env('DB_PORT'),
-    database=get_required_env('DB_NAME'),
-    user=get_required_env('DB_USER'),
-    password=get_required_env('DB_PASSWORD')
-)
-cursor = connection.cursor()
+def connect_sqlite():
+    db_path = os.getenv('SQLITE_DB_PATH') or os.path.join(os.path.dirname(__file__), 'resume_analyzer.db')
+    connection = sqlite3.connect(db_path, check_same_thread=False)
+    return connection, 'sqlite', f"SQLite prototype storage is active at `{db_path}`."
+
+
+def connect_database():
+    postgres_env = ('DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD')
+    if env_is_configured(*postgres_env):
+        try:
+            connection = psycopg2.connect(
+                host=get_required_env('DB_HOST'),
+                port=get_required_env('DB_PORT'),
+                database=get_required_env('DB_NAME'),
+                user=get_required_env('DB_USER'),
+                password=get_required_env('DB_PASSWORD')
+            )
+            return connection, 'postgres', None
+        except Exception as error:
+            sqlite_connection, dialect, _ = connect_sqlite()
+            return sqlite_connection, dialect, (
+                "PostgreSQL connection failed, so the app switched to local SQLite storage for prototype mode. "
+                f"Details: {error}"
+            )
+    return connect_sqlite()
+
+
+def create_cursor(db_connection):
+    return db_connection.cursor()
+
+
+def execute_query(db_cursor, sql, params=None):
+    db_cursor.execute(sql, params or ())
+
+
+def fetch_all(db_cursor, sql, params=None):
+    execute_query(db_cursor, sql, params)
+    return db_cursor.fetchall()
+
+
+def read_dataframe(sql, db_connection):
+    return pd.read_sql(sql, db_connection)
+
+
+def get_text_cast(column_name):
+    return f"{column_name}::TEXT" if DB_DIALECT == 'postgres' else column_name
+
+
+connection, DB_DIALECT, DB_STATUS_MESSAGE = connect_database()
+cursor = create_cursor(connection)
 ADMIN_CREDENTIALS = parse_admin_credentials()
 
 
@@ -601,8 +652,10 @@ def insert_data(sec_token,ip_add,host_name,dev_user,os_name_ver,latlong,city,sta
     insert_sql = "insert into " + DB_table_name + """ 
     (sec_token, ip_add, host_name, dev_user, os_name_ver, latlong, city, state, country, act_name, act_mail, act_mob, name, email_id, resume_score, timestamp, page_no, predicted_field, user_level, actual_skills, recommended_skills, recommended_courses, pdf_name)
     values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    if DB_DIALECT == 'sqlite':
+        insert_sql = insert_sql.replace('%s', '?')
     rec_values = (str(sec_token),str(ip_add),host_name,dev_user,os_name_ver,str(latlong),city,state,country,act_name,act_mail,act_mob,name,email,str(res_score),timestamp,str(no_of_pages),reco_field,cand_level,skills,recommended_skills,courses,pdf_name)
-    cursor.execute(insert_sql, rec_values)
+    execute_query(cursor, insert_sql, rec_values)
     connection.commit()
 
 
@@ -612,8 +665,10 @@ def insertf_data(feed_name,feed_email,feed_score,comments,Timestamp):
     insertfeed_sql = "insert into " + DBf_table_name + """
     (feed_name, feed_email, feed_score, comments, timestamp)
     values (%s,%s,%s,%s,%s)"""
+    if DB_DIALECT == 'sqlite':
+        insertfeed_sql = insertfeed_sql.replace('%s', '?')
     rec_values = (feed_name, feed_email, feed_score, comments, Timestamp)
-    cursor.execute(insertfeed_sql, rec_values)
+    execute_query(cursor, insertfeed_sql, rec_values)
     connection.commit()
 
 
@@ -717,47 +772,90 @@ def run():
 
     choice = st.session_state.get("nav_choice", "User")
 
-    user_table_sql = """
-        CREATE TABLE IF NOT EXISTS user_data (
-            ID SERIAL PRIMARY KEY,
-            sec_token VARCHAR(20) NOT NULL,
-            ip_add VARCHAR(50) NULL,
-            host_name VARCHAR(50) NULL,
-            dev_user VARCHAR(50) NULL,
-            os_name_ver VARCHAR(50) NULL,
-            latlong VARCHAR(50) NULL,
-            city VARCHAR(50) NULL,
-            state VARCHAR(50) NULL,
-            country VARCHAR(50) NULL,
-            act_name VARCHAR(50) NOT NULL,
-            act_mail VARCHAR(50) NOT NULL,
-            act_mob VARCHAR(20) NOT NULL,
-            Name VARCHAR(500) NOT NULL,
-            Email_ID VARCHAR(500) NOT NULL,
-            resume_score VARCHAR(8) NOT NULL,
-            Timestamp VARCHAR(50) NOT NULL,
-            Page_no VARCHAR(5) NOT NULL,
-            Predicted_Field TEXT NOT NULL,
-            User_level TEXT NOT NULL,
-            Actual_skills TEXT NOT NULL,
-            Recommended_skills TEXT NOT NULL,
-            Recommended_courses TEXT NOT NULL,
-            pdf_name VARCHAR(50) NOT NULL
-        );
-    """
-    feedback_table_sql = """
-        CREATE TABLE IF NOT EXISTS user_feedback (
-            ID SERIAL PRIMARY KEY,
-            feed_name VARCHAR(50) NOT NULL,
-            feed_email VARCHAR(50) NOT NULL,
-            feed_score VARCHAR(5) NOT NULL,
-            comments VARCHAR(100) NULL,
-            Timestamp VARCHAR(50) NOT NULL
-        );
-    """
-    cursor.execute(user_table_sql)
-    cursor.execute(feedback_table_sql)
+    if DB_DIALECT == 'postgres':
+        user_table_sql = """
+            CREATE TABLE IF NOT EXISTS user_data (
+                ID SERIAL PRIMARY KEY,
+                sec_token VARCHAR(20) NOT NULL,
+                ip_add VARCHAR(50) NULL,
+                host_name VARCHAR(50) NULL,
+                dev_user VARCHAR(50) NULL,
+                os_name_ver VARCHAR(50) NULL,
+                latlong VARCHAR(50) NULL,
+                city VARCHAR(50) NULL,
+                state VARCHAR(50) NULL,
+                country VARCHAR(50) NULL,
+                act_name VARCHAR(50) NOT NULL,
+                act_mail VARCHAR(50) NOT NULL,
+                act_mob VARCHAR(20) NOT NULL,
+                Name VARCHAR(500) NOT NULL,
+                Email_ID VARCHAR(500) NOT NULL,
+                resume_score VARCHAR(8) NOT NULL,
+                Timestamp VARCHAR(50) NOT NULL,
+                Page_no VARCHAR(5) NOT NULL,
+                Predicted_Field TEXT NOT NULL,
+                User_level TEXT NOT NULL,
+                Actual_skills TEXT NOT NULL,
+                Recommended_skills TEXT NOT NULL,
+                Recommended_courses TEXT NOT NULL,
+                pdf_name VARCHAR(50) NOT NULL
+            );
+        """
+        feedback_table_sql = """
+            CREATE TABLE IF NOT EXISTS user_feedback (
+                ID SERIAL PRIMARY KEY,
+                feed_name VARCHAR(50) NOT NULL,
+                feed_email VARCHAR(50) NOT NULL,
+                feed_score VARCHAR(5) NOT NULL,
+                comments VARCHAR(100) NULL,
+                Timestamp VARCHAR(50) NOT NULL
+            );
+        """
+    else:
+        user_table_sql = """
+            CREATE TABLE IF NOT EXISTS user_data (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                sec_token TEXT NOT NULL,
+                ip_add TEXT,
+                host_name TEXT,
+                dev_user TEXT,
+                os_name_ver TEXT,
+                latlong TEXT,
+                city TEXT,
+                state TEXT,
+                country TEXT,
+                act_name TEXT NOT NULL,
+                act_mail TEXT NOT NULL,
+                act_mob TEXT NOT NULL,
+                Name TEXT NOT NULL,
+                Email_ID TEXT NOT NULL,
+                resume_score TEXT NOT NULL,
+                Timestamp TEXT NOT NULL,
+                Page_no TEXT NOT NULL,
+                Predicted_Field TEXT NOT NULL,
+                User_level TEXT NOT NULL,
+                Actual_skills TEXT NOT NULL,
+                Recommended_skills TEXT NOT NULL,
+                Recommended_courses TEXT NOT NULL,
+                pdf_name TEXT NOT NULL
+            );
+        """
+        feedback_table_sql = """
+            CREATE TABLE IF NOT EXISTS user_feedback (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                feed_name TEXT NOT NULL,
+                feed_email TEXT NOT NULL,
+                feed_score TEXT NOT NULL,
+                comments TEXT,
+                Timestamp TEXT NOT NULL
+            );
+        """
+    execute_query(cursor, user_table_sql)
+    execute_query(cursor, feedback_table_sql)
     connection.commit()
+
+    if DB_STATUS_MESSAGE:
+        st.info(DB_STATUS_MESSAGE)
 
     if choice == 'User':
         st.markdown(section_card("Candidate workspace", "Upload a resume, add a job description, and get a more realistic fit review."), unsafe_allow_html=True)
@@ -777,8 +875,11 @@ def run():
 
         sec_token = secrets.token_urlsafe(12)
         host_name = socket.gethostname()
-        ip_add = socket.gethostbyname(host_name)
-        dev_user = os.getlogin()
+        try:
+            ip_add = socket.gethostbyname(host_name)
+        except Exception:
+            ip_add = 'Unavailable'
+        dev_user = getpass.getuser()
         os_name_ver = platform.system() + " " + platform.release()
         city = ''
         state = ''
@@ -809,6 +910,7 @@ def run():
                 time.sleep(2)
 
             save_image_path = './Uploaded_Resumes/' + pdf_file.name
+            os.makedirs('./Uploaded_Resumes', exist_ok=True)
             pdf_name = pdf_file.name
             with open(save_image_path, "wb") as file_handle:
                 file_handle.write(pdf_file.getbuffer())
@@ -978,13 +1080,16 @@ def run():
                 cur_time = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
                 timestamp = str(cur_date + '_' + cur_time)
 
-                insert_data(
-                    str(sec_token), str(ip_add), host_name, dev_user, os_name_ver, latlong,
-                    city, state, country, act_name, act_mail, act_mob,
-                    resume_data.get('name', ''), resume_data.get('email', ''), str(resume_score),
-                    timestamp, str(resume_data.get('no_of_pages', 0)), reco_field, candidate_level,
-                    str(resume_skills), str(recommended_skills), str(rec_course), pdf_name
-                )
+                try:
+                    insert_data(
+                        str(sec_token), str(ip_add), host_name, dev_user, os_name_ver, latlong,
+                        city, state, country, act_name, act_mail, act_mob,
+                        resume_data.get('name', ''), resume_data.get('email', ''), str(resume_score),
+                        timestamp, str(resume_data.get('no_of_pages', 0)), reco_field, candidate_level,
+                        str(resume_skills), str(recommended_skills), str(rec_course), pdf_name
+                    )
+                except Exception as error:
+                    st.warning(f"Analysis finished, but the session record could not be stored. Details: {error}")
 
                 st.markdown(section_card("Recommended videos", "A few extra learning resources to improve your resume storytelling and interviews."), unsafe_allow_html=True)
                 vid_col1, vid_col2 = st.columns(2)
@@ -1013,18 +1118,20 @@ def run():
             comments = st.text_input('Comments')
             submitted = st.form_submit_button("Submit")
             if submitted:
-                insertf_data(feed_name, feed_email, feed_score, comments, timestamp)
-                st.success("Thanks. Your feedback was recorded.")
+                try:
+                    insertf_data(feed_name, feed_email, feed_score, comments, timestamp)
+                    st.success("Thanks. Your feedback was recorded.")
+                except Exception as error:
+                    st.warning(f"Feedback was received, but storing it failed. Details: {error}")
 
-        plotfeed_data = pd.read_sql('select * from user_feedback', connection)
+        plotfeed_data = read_dataframe('select * from user_feedback', connection)
         labels = plotfeed_data.feed_score.unique()
         values = plotfeed_data.feed_score.value_counts()
         st.subheader("Past User Ratings")
         fig = px.pie(values=values, names=labels, title="User rating score from 1 to 5", color_discrete_sequence=px.colors.sequential.Aggrnyl)
         st.plotly_chart(fig, use_container_width=True)
 
-        cursor.execute('select feed_name, comments from user_feedback')
-        comments_data = cursor.fetchall()
+        comments_data = fetch_all(cursor, 'select feed_name, comments from user_feedback')
         comments_df = pd.DataFrame(comments_data, columns=['User', 'Comment'])
         st.subheader("User Comments")
         st.dataframe(comments_df, width=1000)
@@ -1091,12 +1198,16 @@ def run():
                 active_admin = st.session_state.get("admin_username", "Admin")
                 st.success(f"Welcome {active_admin}. The analytics workspace is ready.")
 
-            cursor.execute('''SELECT ID, ip_add, resume_score, Predicted_Field::TEXT, User_level::TEXT, city, state, country from user_data''')
-            datanalys = cursor.fetchall()
+            datanalys = fetch_all(
+                cursor,
+                f'''SELECT ID, ip_add, resume_score, {get_text_cast("Predicted_Field")}, {get_text_cast("User_level")}, city, state, country from user_data'''
+            )
             plot_data = pd.DataFrame(datanalys, columns=['Idt', 'IP_add', 'resume_score', 'Predicted_Field', 'User_Level', 'City', 'State', 'Country'])
 
-            cursor.execute('''SELECT ID, sec_token, ip_add, act_name, act_mail, act_mob, Predicted_Field::TEXT, Timestamp, Name, Email_ID, resume_score, Page_no, pdf_name, User_level::TEXT, Actual_skills::TEXT, Recommended_skills::TEXT, Recommended_courses::TEXT, city, state, country, latlong, os_name_ver, host_name, dev_user from user_data''')
-            user_rows = cursor.fetchall()
+            user_rows = fetch_all(
+                cursor,
+                f'''SELECT ID, sec_token, ip_add, act_name, act_mail, act_mob, {get_text_cast("Predicted_Field")}, Timestamp, Name, Email_ID, resume_score, Page_no, pdf_name, {get_text_cast("User_level")}, {get_text_cast("Actual_skills")}, {get_text_cast("Recommended_skills")}, {get_text_cast("Recommended_courses")}, city, state, country, latlong, os_name_ver, host_name, dev_user from user_data'''
+            )
             users_df = pd.DataFrame(
                 user_rows,
                 columns=['ID', 'Token', 'IP Address', 'Name', 'Mail', 'Mobile Number', 'Predicted Field', 'Timestamp',
@@ -1105,8 +1216,7 @@ def run():
                          'City', 'State', 'Country', 'Lat Long', 'Server OS', 'Server Name', 'Server User']
             )
 
-            cursor.execute('''SELECT * from user_feedback''')
-            feedback_rows = cursor.fetchall()
+            feedback_rows = fetch_all(cursor, 'SELECT * from user_feedback')
             feedback_df = pd.DataFrame(feedback_rows, columns=['ID', 'Name', 'Email', 'Feedback Score', 'Comments', 'Timestamp'])
 
             build_admin_console(plot_data, users_df, feedback_df, st.session_state.theme_mode)

@@ -8,10 +8,8 @@ Pillow>=9.0.0
 pdfminer3
 pdfminer.six
 
-# Resume parsing
-pyresparser>=1.0.6
+# Resume parsing and analysis
 nltk>=3.7
-spacy>=2.3.5,<3.0.0
 sentence-transformers>=3.0.1
 
 # Database

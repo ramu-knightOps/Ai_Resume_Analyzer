@@ -83,6 +83,7 @@ AI-Resume-Analyzer/
 - Streamlit
 - Plotly
 - PostgreSQL with `psycopg2`
+- SQLite fallback for prototype deployments
 - `pdfminer3`
 - `sentence-transformers`
 - `python-dotenv`
@@ -116,7 +117,6 @@ python -m venv .venv
 ```bash
 cd App
 pip install -r requirements.txt
-python -m spacy download en_core_web_sm
 ```
 
 ### 4. Configure environment variables
@@ -124,6 +124,7 @@ python -m spacy download en_core_web_sm
 Create `App/.env`:
 
 ```env
+SQLITE_DB_PATH=App/resume_analyzer.db
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=your_database
@@ -135,12 +136,42 @@ ADMIN_PASSWORD=your_admin_password
 ADMIN_CREDENTIALS=admin_one:password_one,admin_two:password_two
 ```
 
+For a quick prototype, you can skip the PostgreSQL variables and let the app use local SQLite storage automatically.
+
 ## Run the App 🚀
 
 From the `App` directory:
 
 ```bash
 streamlit run App.py
+```
+
+## Railway Deploy 🚂
+
+This repo includes `nixpacks.toml` and `start.sh`, so Railway can build and run the Streamlit app directly.
+
+Recommended prototype setup:
+
+```env
+SQLITE_DB_PATH=App/resume_analyzer.db
+ADMIN_CREDENTIALS=admin_one:password_one,admin_two:password_two
+HF_TOKEN=optional_huggingface_token
+```
+
+If you want persistent shared analytics across deployments, add PostgreSQL too:
+
+```env
+DB_HOST=...
+DB_PORT=5432
+DB_NAME=...
+DB_USER=...
+DB_PASSWORD=...
+```
+
+Railway start command:
+
+```bash
+bash ./start.sh
 ```
 
 ## Run the API
@@ -197,6 +228,7 @@ python3 -m py_compile App/App.py App/parser_utils.py App/matching_utils.py App/r
 
 - The parser now uses a hybrid strategy: custom text extraction first, optional `pyresparser` support second.
 - Semantic matching works best when the embedding model can load successfully.
+- If PostgreSQL is not configured, the app automatically falls back to SQLite so the prototype can still run.
 - Uploaded resumes and local env files should remain untracked.
 - Admin console access should be configured locally through `ADMIN_CREDENTIALS`, or through the fallback `ADMIN_USERNAME` and `ADMIN_PASSWORD` pair.
 

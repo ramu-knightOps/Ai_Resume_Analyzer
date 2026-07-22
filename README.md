@@ -14,7 +14,7 @@ The application is designed as a decision-support tool. Its scores and suggestio
 
 ![AI Resume Analyzer report overview](images/resume-report-overview.png)
 
-![Resume report detail with PDF preview](images/resume-report-detail.png)
+![Recommended courses and interview resources](images/recommendations-resources.png)
 
 ## Highlights
 

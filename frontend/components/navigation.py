@@ -1,7 +1,6 @@
 """Navigation and shell controls for the Streamlit frontend."""
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 
 NAV_OPTIONS = ["Home", "Analyze", "Results", "Feedback", "About", "Admin"]
@@ -21,38 +20,6 @@ NAV_ICONS = {
     "About": "ⓘ",
     "Admin": "⚙",
 }
-
-
-def ensure_sidebar_open():
-    components.html(
-        """
-        <script>
-        const openSidebarIfNeeded = () => {
-          const doc = window.parent.document;
-          const sidebar = doc.querySelector('[data-testid="stSidebar"]');
-          const opener = doc.querySelector('[data-testid="collapsedControl"] button, [data-testid="stSidebarCollapsedControl"] button, button[kind="header"][aria-label*="sidebar" i]');
-
-          if (!sidebar && opener) {
-            opener.click();
-            return;
-          }
-
-          if (sidebar) {
-            const width = sidebar.getBoundingClientRect().width;
-            if (width < 40 && opener) {
-              opener.click();
-            }
-          }
-        };
-
-        setTimeout(openSidebarIfNeeded, 50);
-        setTimeout(openSidebarIfNeeded, 250);
-        setTimeout(openSidebarIfNeeded, 700);
-        </script>
-        """,
-        height=0,
-    )
-
 
 def render_theme_picker():
     theme_label_map = {

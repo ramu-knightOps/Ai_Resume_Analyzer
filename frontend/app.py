@@ -3,7 +3,7 @@
 import streamlit as st
 
 from .api_client import ResumeAnalyzerClient
-from .components.navigation import ensure_sidebar_open, render_navigation, render_theme_picker
+from .components.navigation import render_navigation, render_theme_picker
 from .components.styles import render_app_styles
 from .pages.about import render_about_page
 from .pages.admin import render_admin_page
@@ -31,7 +31,6 @@ def _initialize_session():
 def run():
     _initialize_session()
     st.markdown(render_app_styles(st.session_state.theme_mode), unsafe_allow_html=True)
-    ensure_sidebar_open()
     choice = render_navigation()
     render_theme_picker()
 

@@ -69,8 +69,8 @@ def render_app_styles(theme_mode):
     }}
 
     .main .block-container {{
-        max-width: 1240px;
-        padding: 1.25rem 2rem 4rem;
+        max-width: 1120px;
+        padding: 0.8rem 1.5rem 2rem;
     }}
 
     h1, h2, h3, h4, h5, p, li, label, span, div {{ color: var(--ink); }}
@@ -82,11 +82,11 @@ def render_app_styles(theme_mode):
     .taskoora-hero {{
         position: relative;
         overflow: hidden;
-        min-height: 380px;
-        margin: 0 0 1.4rem;
-        padding: clamp(1.7rem, 4vw, 3.4rem);
-        border: 4px solid var(--ink);
-        border-radius: 30px;
+        min-height: 300px;
+        margin: 0 0 1rem;
+        padding: clamp(1.4rem, 3vw, 2.3rem);
+        border: 3px solid var(--ink);
+        border-radius: 24px;
         background: var(--surface);
         box-shadow: none;
     }}
@@ -108,11 +108,11 @@ def render_app_styles(theme_mode):
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: clamp(2.5rem, 5vw, 4rem);
+        margin-bottom: clamp(1.6rem, 3vw, 2.4rem);
     }}
 
     .taskoora-logo {{
-        font-size: 1.35rem;
+        font-size: 1.1rem;
         font-weight: 900;
         letter-spacing: -0.055em;
         text-transform: uppercase;
@@ -140,19 +140,19 @@ def render_app_styles(theme_mode):
 
     .hero-title {{
         margin: 0.9rem auto 1.1rem;
-        font-size: clamp(2.8rem, 6vw, 5.7rem);
-        line-height: 0.96;
+        font-size: clamp(2.3rem, 4vw, 3.9rem);
+        line-height: 1;
         font-weight: 750;
         letter-spacing: -0.075em;
     }}
 
     .hero-title .accent {{ color: var(--primary) !important; }}
     .hero-subtitle {{
-        max-width: 690px;
+        max-width: 640px;
         margin: 0 auto;
         color: var(--muted) !important;
-        font-size: clamp(1rem, 1.8vw, 1.18rem);
-        line-height: 1.6;
+        font-size: clamp(0.92rem, 1.4vw, 1.05rem);
+        line-height: 1.5;
     }}
 
     .connection-status {{
@@ -243,15 +243,15 @@ def render_app_styles(theme_mode):
     .theme-switcher-module__q-SprW__root + div[data-testid="stRadio"] label p {{ color: inherit !important; }}
 
     .section-card {{
-        margin: 0.6rem 0 1rem;
-        padding: 1.25rem 1.35rem;
+        margin: 0.35rem 0 0.75rem;
+        padding: 1rem 1.05rem;
         border: 1px solid var(--line);
         border-left: 4px solid var(--primary);
         border-radius: var(--radius-md);
         background: var(--surface);
     }}
-    .section-card-title {{ font-size: 1.25rem; font-weight: 850; letter-spacing: -0.025em; }}
-    .section-card-copy {{ margin-top: 0.35rem; color: var(--muted) !important; font-size: 0.94rem; line-height: 1.5; }}
+    .section-card-title {{ font-size: 1.08rem; font-weight: 850; letter-spacing: -0.025em; }}
+    .section-card-copy {{ margin-top: 0.3rem; color: var(--muted) !important; font-size: 0.88rem; line-height: 1.45; }}
 
     .info-card {{
         min-height: 142px;
@@ -370,16 +370,53 @@ def render_app_styles(theme_mode):
     .stExpander, [data-testid="stDataFrame"] {{ border: 1px solid var(--line) !important; border-radius: var(--radius-md) !important; overflow: hidden; }}
 
     header[data-testid="stHeader"] {{ background: color-mix(in srgb, var(--canvas) 92%, transparent) !important; }}
-    div[data-testid="stToolbar"] {{ visibility: hidden; }}
     footer {{ display: none !important; }}
-    [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"] {{ position: fixed !important; top: 0.75rem !important; left: 0.75rem !important; z-index: 10000 !important; }}
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stExpandSidebarButton"] {{
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        top: 0.7rem !important;
+        left: 0.7rem !important;
+        z-index: 10000 !important;
+    }}
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="stExpandSidebarButton"],
+    button[kind="header"][aria-label*="sidebar" i] {{
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 2.6rem !important;
+        height: 2.6rem !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 50% !important;
+        background: var(--primary) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+    }}
+    [data-testid="collapsedControl"] button svg,
+    [data-testid="stSidebarCollapsedControl"] button svg,
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="stExpandSidebarButton"] svg,
+    button[kind="header"][aria-label*="sidebar" i] svg {{
+        color: #ffffff !important;
+        fill: #ffffff !important;
+    }}
+    [data-testid="stSidebarCollapseButton"] [data-testid="stIconMaterial"],
+    [data-testid="stSidebarCollapsedControl"] [data-testid="stIconMaterial"],
+    [data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] {{ color: #ffffff !important; }}
 
     @media (max-width: 760px) {{
-        .main .block-container {{ padding: 1rem 0.8rem 3rem; }}
-        .taskoora-hero {{ min-height: 390px; padding: 1.5rem; border-width: 3px; border-radius: 24px; }}
-        .hero-topline {{ margin-bottom: 3rem; }}
+        .main .block-container {{ padding: 0.7rem 0.75rem 1.5rem; }}
+        .taskoora-hero {{ min-height: 310px; padding: 1.25rem; border-width: 2px; border-radius: 20px; }}
+        .hero-topline {{ margin-bottom: 2rem; }}
         .hero-tag {{ display: none; }}
-        .hero-title {{ font-size: clamp(3.25rem, 16vw, 5rem); }}
+        .hero-title {{ font-size: clamp(2.25rem, 11vw, 3rem); letter-spacing: -0.055em; }}
     }}
 </style>
 """

@@ -68,9 +68,10 @@ def render_app_styles(theme_mode):
         font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }}
 
-    .main .block-container {{
-        max-width: 1120px;
-        padding: 0.8rem 1.5rem 2rem;
+    .main .block-container,
+    [data-testid="stMainBlockContainer"] {{
+        max-width: 960px;
+        padding: 3.2rem 1.2rem 1.6rem;
     }}
 
     h1, h2, h3, h4, h5, p, li, label, span, div {{ color: var(--ink); }}
@@ -172,17 +173,20 @@ def render_app_styles(theme_mode):
     .connection-status.connected span {{ background: #2f9e62; }}
 
     [data-testid="stSidebar"] {{
+        width: 228px !important;
+        min-width: 228px !important;
+        max-width: 228px !important;
         background: var(--sidebar);
         border-right: 1px solid var(--sidebar-line);
     }}
-    [data-testid="stSidebar"] > div {{ background: var(--sidebar); }}
+    [data-testid="stSidebar"] > div {{ width: 228px !important; background: var(--sidebar); }}
     [data-testid="stSidebar"] * {{ color: var(--sidebar-text) !important; }}
 
-    .nav-stage {{ display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 0.4rem 1.1rem; margin-bottom: 0.4rem; }}
-    .nav-mark {{ display: grid; place-items: center; width: 2.35rem; height: 2.35rem; border-radius: 50%; background: var(--primary); color: #ffffff !important; font-weight: 900; }}
+    .nav-stage {{ display: flex; align-items: center; gap: 0.65rem; padding: 0.4rem 0.3rem 0.75rem; margin-bottom: 0.25rem; }}
+    .nav-mark {{ display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--primary); color: #ffffff !important; font-size: 0.85rem; font-weight: 900; }}
     .nav-title {{
         margin: 0;
-        font-size: 1.25rem;
+        font-size: 1.08rem;
         font-weight: 850;
         letter-spacing: -0.035em;
     }}
@@ -190,13 +194,14 @@ def render_app_styles(theme_mode):
     [data-testid="stSidebar"] .stButton > button {{
         justify-content: flex-start !important;
         width: 100%;
-        padding: 0.82rem 0.75rem !important;
+        min-height: 2.35rem !important;
+        padding: 0.55rem 0.65rem !important;
         border: 1px solid transparent !important;
-        border-radius: 13px !important;
+        border-radius: 10px !important;
         background: transparent !important;
         color: var(--sidebar-text) !important;
         box-shadow: none !important;
-        font-size: 1rem !important;
+        font-size: 0.9rem !important;
         font-weight: 650 !important;
         text-align: left !important;
     }}
@@ -206,52 +211,21 @@ def render_app_styles(theme_mode):
         color: var(--sidebar-text) !important;
     }}
 
-    .theme-inline-label {{
-        margin: 2.7rem 0 0.55rem;
-        color: var(--muted) !important;
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-    }}
-    .theme-switcher-module__q-SprW__root {{ height: 0; }}
-    .theme-switcher-module__q-SprW__root + div[data-testid="stRadio"] div[role="radiogroup"] {{
-        display: inline-flex;
-        gap: 0.2rem;
-        padding: 0.22rem;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        background: var(--surface-alt);
-    }}
-    .theme-switcher-module__q-SprW__root + div[data-testid="stRadio"] label {{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: auto;
-        height: 30px;
-        min-width: 54px;
-        margin: 0;
-        padding: 0 0.7rem;
-        border-radius: 999px;
-        cursor: pointer;
-    }}
-    .theme-switcher-module__q-SprW__root + div[data-testid="stRadio"] label:has(input:checked) {{
-        border-radius: 999px;
-        background: var(--ink);
-        color: var(--surface) !important;
-    }}
-    .theme-switcher-module__q-SprW__root + div[data-testid="stRadio"] label p {{ color: inherit !important; }}
+    [data-testid="stSidebar"] .stSelectbox {{ margin-top: 0.8rem; }}
+    [data-testid="stSidebar"] .stSelectbox label p {{ color: var(--sidebar-muted) !important; font-size: 0.76rem !important; font-weight: 750 !important; }}
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {{ min-height: 2.25rem !important; border-radius: 10px !important; }}
 
     .section-card {{
-        margin: 0.35rem 0 0.75rem;
-        padding: 1rem 1.05rem;
+        margin: 0.25rem 0 0.65rem;
+        padding: 0.85rem 1rem;
         border: 1px solid var(--line);
-        border-left: 4px solid var(--primary);
-        border-radius: var(--radius-md);
+        border-left: 3px solid var(--primary);
+        border-radius: 13px;
         background: var(--surface);
+        box-shadow: 0 6px 20px rgba(15, 35, 55, 0.05);
     }}
-    .section-card-title {{ font-size: 1.08rem; font-weight: 850; letter-spacing: -0.025em; }}
-    .section-card-copy {{ margin-top: 0.3rem; color: var(--muted) !important; font-size: 0.88rem; line-height: 1.45; }}
+    .section-card-title {{ font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; }}
+    .section-card-copy {{ margin-top: 0.2rem; color: var(--muted) !important; font-size: 0.84rem; line-height: 1.4; }}
 
     .info-card {{
         min-height: 142px;
@@ -269,15 +243,16 @@ def render_app_styles(theme_mode):
     .info-card[data-tone="warm"] .info-card-copy {{ color: var(--muted) !important; }}
 
     [data-testid="stForm"] {{
-        padding: clamp(1.1rem, 3vw, 2rem);
+        padding: clamp(0.9rem, 2vw, 1.35rem);
         border: 1px solid var(--line);
-        border-radius: var(--radius-lg);
+        border-radius: 16px;
         background: var(--surface);
+        box-shadow: 0 10px 28px rgba(15, 35, 55, 0.06);
     }}
     .stTextInput input, .stTextArea textarea, .stNumberInput input,
     .stSelectbox [data-baseweb="select"] > div {{
-        border: 1px solid var(--line) !important;
-        border-radius: 13px !important;
+        border: 1px solid color-mix(in srgb, var(--line) 82%, var(--muted)) !important;
+        border-radius: 10px !important;
         background: var(--input) !important;
         color: var(--ink) !important;
         box-shadow: none !important;
@@ -287,11 +262,11 @@ def render_app_styles(theme_mode):
     .stTextInput label, .stTextArea label, .stSelectbox label, .stFileUploader label {{ font-weight: 750 !important; }}
 
     .main .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button {{
-        min-height: 48px;
-        border: 2px solid var(--ink) !important;
+        min-height: 42px;
+        border: 1px solid var(--primary) !important;
         border-radius: 999px !important;
-        background: var(--ink) !important;
-        color: var(--surface) !important;
+        background: var(--primary) !important;
+        color: #ffffff !important;
         box-shadow: none !important;
         font-weight: 850 !important;
     }}
@@ -305,9 +280,9 @@ def render_app_styles(theme_mode):
     }}
 
     .stFileUploader [data-testid="stFileUploaderDropzone"] {{
-        padding: 1rem !important;
-        border: 2px dashed var(--primary) !important;
-        border-radius: var(--radius-md) !important;
+        padding: 0.65rem 0.8rem !important;
+        border: 1px dashed var(--primary) !important;
+        border-radius: 12px !important;
         background: var(--surface-alt) !important;
     }}
     .stFileUploader [data-testid="stFileUploaderDropzone"] * {{ color: var(--ink) !important; }}
@@ -412,7 +387,7 @@ def render_app_styles(theme_mode):
     [data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] {{ color: #ffffff !important; }}
 
     @media (max-width: 760px) {{
-        .main .block-container {{ padding: 0.7rem 0.75rem 1.5rem; }}
+        .main .block-container, [data-testid="stMainBlockContainer"] {{ padding: 3rem 0.65rem 1.2rem; }}
         .taskoora-hero {{ min-height: 310px; padding: 1.25rem; border-width: 2px; border-radius: 20px; }}
         .hero-topline {{ margin-bottom: 2rem; }}
         .hero-tag {{ display: none; }}

@@ -14,7 +14,7 @@ NAV_LABELS = {
 }
 NAV_ICONS = {
     "Home": "⌂",
-    "Analyze": "+",
+    "Analyze": "＋",
     "Results": "▤",
     "Feedback": "◇",
     "About": "ⓘ",
@@ -22,12 +22,6 @@ NAV_ICONS = {
 }
 
 def render_theme_picker():
-    theme_label_map = {
-        "System": "Theme · Auto",
-        "Light": "Theme · Light",
-        "Dark": "Theme · Dark",
-    }
-
     def _on_theme_change():
         st.session_state.theme_mode = {
             "Auto": "System",
@@ -35,17 +29,10 @@ def render_theme_picker():
             "Dark": "Dark",
         }[st.session_state.theme_selector]
 
-    st.sidebar.markdown(
-        f"<div class='theme-inline-label'>{theme_label_map[st.session_state.theme_mode]}</div>",
-        unsafe_allow_html=True,
-    )
-    st.sidebar.markdown("<div class='theme-switcher-module__q-SprW__root' data-small=''></div>", unsafe_allow_html=True)
-    st.sidebar.radio(
-        "Theme mode",
+    st.sidebar.selectbox(
+        "Theme",
         ["Auto", "Light", "Dark"],
         key="theme_selector",
-        horizontal=True,
-        label_visibility="collapsed",
         on_change=_on_theme_change,
     )
 

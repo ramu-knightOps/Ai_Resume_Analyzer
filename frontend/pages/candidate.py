@@ -36,7 +36,7 @@ def render_candidate_page(database, client: ResumeAnalyzerClient):
 
         job_description = st.text_area(
             "Target Job Description",
-            height=180,
+            height=130,
             placeholder="Paste the job description here. The analysis will compare its requirements with evidence in your resume.",
         )
         pdf_file = st.file_uploader("Upload resume", type=["pdf"])

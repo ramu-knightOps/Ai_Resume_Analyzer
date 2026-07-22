@@ -80,7 +80,7 @@ def render_app_styles(theme_mode):
         letter-spacing: -0.035em;
     }}
 
-    .taskoora-hero {{
+    .analyzer-hero {{
         position: relative;
         overflow: hidden;
         min-height: 300px;
@@ -92,7 +92,7 @@ def render_app_styles(theme_mode):
         box-shadow: none;
     }}
 
-    .taskoora-hero::after {{
+    .analyzer-hero::after {{
         content: "";
         position: absolute;
         left: 0;
@@ -112,10 +112,10 @@ def render_app_styles(theme_mode):
         margin-bottom: clamp(1.6rem, 3vw, 2.4rem);
     }}
 
-    .taskoora-logo {{
-        font-size: 1.1rem;
-        font-weight: 900;
-        letter-spacing: -0.055em;
+    .analyzer-logo {{
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 0.055em;
         text-transform: uppercase;
     }}
 
@@ -186,9 +186,9 @@ def render_app_styles(theme_mode):
     .nav-mark {{ display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--primary); color: #ffffff !important; font-size: 0.85rem; font-weight: 900; }}
     .nav-title {{
         margin: 0;
-        font-size: 1.08rem;
-        font-weight: 850;
-        letter-spacing: -0.035em;
+        font-size: 0.94rem;
+        font-weight: 720;
+        letter-spacing: -0.018em;
     }}
 
     [data-testid="stSidebar"] .stButton > button {{
@@ -255,10 +255,19 @@ def render_app_styles(theme_mode):
         border-radius: 10px !important;
         background: var(--input) !important;
         color: var(--ink) !important;
+        -webkit-text-fill-color: var(--ink) !important;
+        caret-color: var(--primary) !important;
         box-shadow: none !important;
     }}
-    .stTextInput input:focus, .stTextArea textarea:focus {{ border-color: var(--primary) !important; }}
-    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{ color: var(--muted) !important; opacity: 0.8; }}
+    .stTextInput input:focus, .stTextArea textarea:focus {{
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 2px var(--primary-soft) !important;
+    }}
+    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+        color: var(--muted) !important;
+        -webkit-text-fill-color: var(--muted) !important;
+        opacity: 0.82;
+    }}
     .stTextInput label, .stTextArea label, .stSelectbox label, .stFileUploader label {{ font-weight: 750 !important; }}
 
     .main .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button {{
@@ -388,7 +397,7 @@ def render_app_styles(theme_mode):
 
     @media (max-width: 760px) {{
         .main .block-container, [data-testid="stMainBlockContainer"] {{ padding: 3rem 0.65rem 1.2rem; }}
-        .taskoora-hero {{ min-height: 310px; padding: 1.25rem; border-width: 2px; border-radius: 20px; }}
+        .analyzer-hero {{ min-height: 310px; padding: 1.25rem; border-width: 2px; border-radius: 20px; }}
         .hero-topline {{ margin-bottom: 2rem; }}
         .hero-tag {{ display: none; }}
         .hero-title {{ font-size: clamp(2.25rem, 11vw, 3rem); letter-spacing: -0.055em; }}
@@ -399,9 +408,9 @@ def render_app_styles(theme_mode):
 
 def hero_section():
     return """
-    <section class="taskoora-hero">
+    <section class="analyzer-hero">
         <div class="hero-topline">
-            <div class="taskoora-logo">Taskoora</div>
+            <div class="analyzer-logo">AI Resume Analyzer</div>
             <div class="hero-tag">Resume × Job Description</div>
         </div>
         <div class="hero-copy">

@@ -48,8 +48,8 @@ def render_navigation() -> str:
     st.sidebar.markdown(
         """
         <div class='nav-stage'>
-            <div class='nav-mark'>T</div>
-            <div class='nav-title'>Taskoora</div>
+            <div class='nav-mark'>AI</div>
+            <div class='nav-title'>AI Resume Analyzer</div>
         </div>
         """,
         unsafe_allow_html=True,

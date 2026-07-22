@@ -15,7 +15,7 @@ from .services.storage import get_database
 
 
 st.set_page_config(
-    page_title="TASKOORA",
+    page_title="AI Resume Analyzer",
     page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded",

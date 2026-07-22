@@ -39,6 +39,16 @@ def run():
         st.info(database.status_message)
 
     client = ResumeAnalyzerClient()
+    api_connected = client.is_available()
+    status_class = "connected" if api_connected else "offline"
+    status_label = "Analysis API connected" if api_connected else "Analysis API offline"
+    st.markdown(
+        f"<div class='connection-status {status_class}'><span></span>{status_label}</div>",
+        unsafe_allow_html=True,
+    )
+    if not api_connected:
+        st.caption("Start the backend with `python -m backend.app.main`, then refresh this page.")
+
     if choice == "User":
         render_candidate_page(database, client)
     elif choice == "Feedback":

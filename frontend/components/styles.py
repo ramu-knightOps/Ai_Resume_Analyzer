@@ -84,11 +84,11 @@ def render_app_styles(theme_mode):
     .taskoora-hero {{
         position: relative;
         overflow: hidden;
-        min-height: 490px;
+        min-height: 380px;
         margin: 0 0 1.4rem;
-        padding: clamp(2rem, 5vw, 4.6rem);
-        border: 7px solid var(--ink);
-        border-radius: 38px;
+        padding: clamp(1.7rem, 4vw, 3.4rem);
+        border: 4px solid var(--ink);
+        border-radius: 30px;
         background: var(--surface);
         box-shadow: var(--shadow);
     }}
@@ -96,11 +96,13 @@ def render_app_styles(theme_mode):
     .taskoora-hero::after {{
         content: "";
         position: absolute;
-        inset: 20% 12% auto 12%;
-        height: 48%;
-        border-radius: 50%;
-        background: color-mix(in srgb, var(--amber-soft) 48%, transparent);
-        filter: blur(72px);
+        right: -28px;
+        bottom: -28px;
+        width: 110px;
+        height: 110px;
+        border-radius: 28px;
+        background: var(--amber);
+        transform: rotate(12deg);
         pointer-events: none;
     }}
 
@@ -110,7 +112,7 @@ def render_app_styles(theme_mode):
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: clamp(3rem, 7vw, 6rem);
+        margin-bottom: clamp(2.5rem, 5vw, 4rem);
     }}
 
     .taskoora-logo {{
@@ -142,8 +144,8 @@ def render_app_styles(theme_mode):
 
     .hero-title {{
         margin: 0.9rem auto 1.1rem;
-        font-size: clamp(3.1rem, 7.5vw, 7.5rem);
-        line-height: 0.92;
+        font-size: clamp(2.8rem, 6vw, 5.7rem);
+        line-height: 0.96;
         font-weight: 750;
         letter-spacing: -0.075em;
     }}
@@ -175,6 +177,22 @@ def render_app_styles(theme_mode):
     }}
 
     .hero-feature:first-child {{ background: var(--amber); border-color: var(--amber); color: #191510 !important; }}
+
+    .connection-status {{
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 0.8rem;
+        padding: 0.48rem 0.72rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--muted) !important;
+        font-size: 0.78rem;
+        font-weight: 750;
+    }}
+    .connection-status span {{ width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--orange); }}
+    .connection-status.connected span {{ background: #2f9e62; }}
 
     [data-testid="stSidebar"] {{
         background: var(--sidebar);
@@ -311,6 +329,9 @@ def render_app_styles(theme_mode):
         box-shadow: none !important;
         font-weight: 850 !important;
     }}
+    .main .stButton > button *, .stFormSubmitButton > button *, .stDownloadButton > button * {{
+        color: inherit !important;
+    }}
     .main .stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover {{
         border-color: var(--orange) !important;
         background: var(--orange) !important;
@@ -324,11 +345,24 @@ def render_app_styles(theme_mode):
         background: var(--surface-alt) !important;
     }}
     .stFileUploader [data-testid="stFileUploaderDropzone"] * {{ color: var(--ink) !important; }}
-    .stFileUploader button {{
-        border: 1px solid var(--ink) !important;
+    .stFileUploader [data-testid="stFileUploaderDropzone"] button {{
+        border: 1px solid #191510 !important;
         border-radius: 999px !important;
-        background: var(--ink) !important;
-        color: var(--surface) !important;
+        background: #fffaf2 !important;
+        color: #191510 !important;
+        -webkit-text-fill-color: #191510 !important;
+    }}
+    .stFileUploader [data-testid="stFileUploaderDropzone"] button *,
+    .stFileUploader [data-testid="stFileUploaderDropzone"] button p {{
+        color: #191510 !important;
+        -webkit-text-fill-color: #191510 !important;
+    }}
+    .stFileUploader button:focus-visible,
+    .main .stButton > button:focus-visible,
+    .stFormSubmitButton > button:focus-visible,
+    .stDownloadButton > button:focus-visible {{
+        outline: 3px solid var(--amber) !important;
+        outline-offset: 3px;
     }}
 
     .stTabs [data-baseweb="tab-list"] {{
@@ -377,8 +411,8 @@ def render_app_styles(theme_mode):
 
     @media (max-width: 760px) {{
         .main .block-container {{ padding: 1rem 0.8rem 3rem; }}
-        .taskoora-hero {{ min-height: 440px; padding: 1.5rem; border-width: 5px; border-radius: 28px; }}
-        .hero-topline {{ margin-bottom: 4rem; }}
+        .taskoora-hero {{ min-height: 390px; padding: 1.5rem; border-width: 3px; border-radius: 24px; }}
+        .hero-topline {{ margin-bottom: 3rem; }}
         .hero-tag {{ display: none; }}
         .hero-title {{ font-size: clamp(3.25rem, 16vw, 5rem); }}
     }}

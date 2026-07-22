@@ -25,6 +25,15 @@ class ResumeAnalyzerClient:
         except (HTTPError, URLError) as error:
             raise BackendAPIError("The backend API is unavailable. Start it with `python -m backend.app.main`.") from error
 
+    def is_available(self) -> bool:
+        """Return whether the configured analysis API is reachable."""
+        try:
+            with urlopen(f"{self.base_url}/api/v1/health", timeout=2) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+                return response.status == 200 and payload.get("data", {}).get("status") == "ok"
+        except (HTTPError, URLError, json.JSONDecodeError, TimeoutError):
+            return False
+
     def analyze(self, *, candidate_name: str, resume_text: str, resume_skills: list[str], job_description: str) -> dict:
         try:
             body = self._post(

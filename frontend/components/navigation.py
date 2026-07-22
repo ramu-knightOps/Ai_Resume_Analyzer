@@ -3,22 +3,24 @@
 import streamlit as st
 
 
-NAV_OPTIONS = ["Home", "Analyze", "Results", "Feedback", "About", "Admin"]
+PRIMARY_NAV_OPTIONS = ["Analyze", "Results", "Feedback"]
+SECONDARY_NAV_OPTIONS = ["Home", "About", "Admin"]
+NAV_OPTIONS = PRIMARY_NAV_OPTIONS + SECONDARY_NAV_OPTIONS
 NAV_LABELS = {
     "Home": "Home",
-    "Analyze": "Analyze resume",
+    "Analyze": "Analyze",
     "Results": "Results",
     "Feedback": "Feedback",
     "About": "About",
     "Admin": "Admin",
 }
 NAV_ICONS = {
-    "Home": "⌂",
-    "Analyze": "＋",
-    "Results": "▤",
-    "Feedback": "◇",
-    "About": "ⓘ",
-    "Admin": "⚙",
+    "Home": "00",
+    "Analyze": "01",
+    "Results": "02",
+    "Feedback": "03",
+    "About": "04",
+    "Admin": "05",
 }
 
 def render_theme_picker():
@@ -42,8 +44,7 @@ def render_navigation() -> str:
         st.session_state.nav_choice = target
 
     def _format_nav(key):
-        active_marker = "  •" if st.session_state.get("nav_choice") == key else ""
-        return f"{NAV_ICONS[key]}  {NAV_LABELS[key]}{active_marker}"
+        return f"{NAV_ICONS[key]}  {NAV_LABELS[key]}"
 
     st.sidebar.markdown(
         """
@@ -55,7 +56,18 @@ def render_navigation() -> str:
         unsafe_allow_html=True,
     )
 
-    for nav_key in NAV_OPTIONS:
+    st.sidebar.markdown("<div class='nav-group-label'>Workflow</div>", unsafe_allow_html=True)
+    for nav_key in PRIMARY_NAV_OPTIONS:
+        st.sidebar.button(
+            _format_nav(nav_key),
+            key=f"nav_{nav_key.lower()}",
+            width="stretch",
+            on_click=_set_nav,
+            args=(nav_key,),
+        )
+
+    st.sidebar.markdown("<div class='nav-group-label secondary'>Workspace</div>", unsafe_allow_html=True)
+    for nav_key in SECONDARY_NAV_OPTIONS:
         st.sidebar.button(
             _format_nav(nav_key),
             key=f"nav_{nav_key.lower()}",
@@ -67,8 +79,9 @@ def render_navigation() -> str:
     st.sidebar.markdown("---")
     st.sidebar.markdown(
         """
-        <div style='padding: 12px 4px 2px 4px;'>
-            <div style='font-size: 0.82rem; line-height: 1.5; color: var(--sidebar-muted) !important;'>Resume evidence, organized by task.</div>
+        <div class='nav-footnote'>
+            <div class='nav-footnote-title'>Evidence first</div>
+            <div class='nav-footnote-copy'>Resume fit, gaps, and next edits in one workflow.</div>
         </div>
         """,
         unsafe_allow_html=True,

@@ -56,7 +56,7 @@ def run():
     elif choice == "Results":
         render_results_page(client)
     elif choice == "Feedback":
-        render_feedback_page(database)
+        render_feedback_page(database, st.session_state.theme_mode)
     elif choice == "About":
         render_about_page()
     elif choice == "Admin":

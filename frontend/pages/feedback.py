@@ -1,12 +1,49 @@
 """Feedback page."""
 
-import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
+from ..components.admin_dashboard import apply_chart_theme, get_chart_theme_settings
 from ..components.styles import section_card
 
 
-def render_feedback_page(database):
+def build_rating_chart(feedback_df, theme_mode):
+    chart_theme = get_chart_theme_settings(theme_mode)
+    ratings = feedback_df.feed_score.value_counts().sort_index()
+    labels = [f"{rating} star" for rating in ratings.index]
+    figure = go.Figure(
+        go.Pie(
+            labels=labels,
+            values=ratings.values,
+            hole=0.58,
+            marker=dict(
+                colors=["#5ba4d9", "#45b979", "#8fb8dd", "#2f9e62", "#1769aa"],
+                line=dict(color=chart_theme["bar_line"], width=2),
+            ),
+            textinfo="percent",
+            textfont=dict(color=chart_theme["font_color"], size=15),
+            hovertemplate="%{label}: %{value} response(s)<extra></extra>",
+        )
+    )
+    figure.update_layout(
+        title="User Rating Mix",
+        height=360,
+        margin=dict(l=20, r=20, t=58, b=20),
+        legend=dict(orientation="h", y=-0.08, x=0.5, xanchor="center"),
+        annotations=[
+            dict(
+                text=f"{int(ratings.sum())}<br>reviews",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+                font=dict(size=18, color=chart_theme["font_color"]),
+            )
+        ],
+    )
+    return apply_chart_theme(figure, theme_mode)
+
+
+def render_feedback_page(database, theme_mode: str):
     st.markdown(section_card("Feedback", "Share what worked, what felt unclear, and what you want next."), unsafe_allow_html=True)
     with st.form("feedback_form"):
         name = st.text_input("Name")
@@ -26,10 +63,7 @@ def render_feedback_page(database):
     if feedback_df.empty:
         st.info("No feedback has been recorded yet.")
     else:
-        labels = feedback_df.feed_score.unique()
-        values = feedback_df.feed_score.value_counts()
-        figure = px.pie(values=values, names=labels, title="User rating score from 1 to 5", color_discrete_sequence=px.colors.sequential.Aggrnyl)
-        st.plotly_chart(figure, width="stretch")
+        st.plotly_chart(build_rating_chart(feedback_df, theme_mode), width="stretch")
 
     st.subheader("User Comments")
     st.dataframe(database.load_comments(), width=1000)

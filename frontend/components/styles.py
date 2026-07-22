@@ -2,37 +2,35 @@
 
 
 LIGHT_THEME = {
-    "canvas": "#f2e9dc",
-    "surface": "#fffaf2",
-    "surface_alt": "#f7ead3",
-    "ink": "#191510",
-    "muted": "#6f6255",
-    "line": "#d7c7b5",
-    "amber": "#f4ad24",
-    "amber_soft": "#ffd991",
-    "orange": "#e9571c",
-    "input": "#fffdf8",
-    "sidebar": "#1b1713",
-    "sidebar_text": "#fff8ed",
-    "sidebar_muted": "#cdbca8",
-    "sidebar_line": "#3c3229",
+    "canvas": "#f7f8fa",
+    "surface": "#ffffff",
+    "surface_alt": "#eef3f8",
+    "ink": "#17202a",
+    "muted": "#627080",
+    "line": "#dce2e8",
+    "primary": "#1769aa",
+    "primary_soft": "#e6f0f8",
+    "input": "#ffffff",
+    "sidebar": "#ffffff",
+    "sidebar_text": "#17202a",
+    "sidebar_muted": "#627080",
+    "sidebar_line": "#e5e9ee",
 }
 
 DARK_THEME = {
-    "canvas": "#110e0b",
-    "surface": "#1b1713",
-    "surface_alt": "#282018",
-    "ink": "#fff8ed",
-    "muted": "#cdbca8",
-    "line": "#43372c",
-    "amber": "#f7b733",
-    "amber_soft": "#5a3c12",
-    "orange": "#ff6b2c",
-    "input": "#211b16",
-    "sidebar": "#090806",
-    "sidebar_text": "#fff8ed",
-    "sidebar_muted": "#b8a894",
-    "sidebar_line": "#332a22",
+    "canvas": "#101419",
+    "surface": "#181e25",
+    "surface_alt": "#202832",
+    "ink": "#f3f6f8",
+    "muted": "#aab5c0",
+    "line": "#303b46",
+    "primary": "#5ba4d9",
+    "primary_soft": "#19364d",
+    "input": "#151b21",
+    "sidebar": "#101419",
+    "sidebar_text": "#f3f6f8",
+    "sidebar_muted": "#aab5c0",
+    "sidebar_line": "#2a333d",
 }
 
 
@@ -90,19 +88,17 @@ def render_app_styles(theme_mode):
         border: 4px solid var(--ink);
         border-radius: 30px;
         background: var(--surface);
-        box-shadow: var(--shadow);
+        box-shadow: none;
     }}
 
     .taskoora-hero::after {{
         content: "";
         position: absolute;
-        right: -28px;
-        bottom: -28px;
-        width: 110px;
-        height: 110px;
-        border-radius: 28px;
-        background: var(--amber);
-        transform: rotate(12deg);
+        left: 0;
+        top: 0;
+        width: 8px;
+        height: 100%;
+        background: var(--primary);
         pointer-events: none;
     }}
 
@@ -135,7 +131,7 @@ def render_app_styles(theme_mode):
 
     .hero-copy {{ max-width: 950px; margin: 0 auto; text-align: center; }}
     .hero-kicker {{
-        color: var(--orange) !important;
+        color: var(--primary) !important;
         font-size: 0.78rem;
         font-weight: 900;
         letter-spacing: 0.14em;
@@ -150,7 +146,7 @@ def render_app_styles(theme_mode):
         letter-spacing: -0.075em;
     }}
 
-    .hero-title .accent {{ color: var(--orange) !important; }}
+    .hero-title .accent {{ color: var(--primary) !important; }}
     .hero-subtitle {{
         max-width: 690px;
         margin: 0 auto;
@@ -158,25 +154,6 @@ def render_app_styles(theme_mode):
         font-size: clamp(1rem, 1.8vw, 1.18rem);
         line-height: 1.6;
     }}
-
-    .hero-features {{
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.65rem;
-        margin-top: 2rem;
-    }}
-
-    .hero-feature {{
-        padding: 0.7rem 1rem;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        background: var(--surface);
-        font-size: 0.84rem;
-        font-weight: 750;
-    }}
-
-    .hero-feature:first-child {{ background: var(--amber); border-color: var(--amber); color: #191510 !important; }}
 
     .connection-status {{
         display: inline-flex;
@@ -191,7 +168,7 @@ def render_app_styles(theme_mode):
         font-size: 0.78rem;
         font-weight: 750;
     }}
-    .connection-status span {{ width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--orange); }}
+    .connection-status span {{ width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #b65f56; }}
     .connection-status.connected span {{ background: #2f9e62; }}
 
     [data-testid="stSidebar"] {{
@@ -201,42 +178,31 @@ def render_app_styles(theme_mode):
     [data-testid="stSidebar"] > div {{ background: var(--sidebar); }}
     [data-testid="stSidebar"] * {{ color: var(--sidebar-text) !important; }}
 
-    .nav-stage {{
-        padding: 1rem 0.4rem 1.2rem;
-        margin-bottom: 0.4rem;
-        border-bottom: 1px solid var(--sidebar-line);
-    }}
-    .nav-kicker {{
-        color: var(--amber) !important;
-        font-size: 0.72rem;
-        font-weight: 850;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-    }}
+    .nav-stage {{ display: flex; align-items: center; gap: 0.75rem; padding: 0.8rem 0.4rem 1.1rem; margin-bottom: 0.4rem; }}
+    .nav-mark {{ display: grid; place-items: center; width: 2.35rem; height: 2.35rem; border-radius: 50%; background: var(--primary); color: #ffffff !important; font-weight: 900; }}
     .nav-title {{
-        margin: 0.4rem 0 0.55rem;
-        font-size: 1.85rem;
+        margin: 0;
+        font-size: 1.25rem;
         font-weight: 850;
-        letter-spacing: -0.05em;
+        letter-spacing: -0.035em;
     }}
-    .nav-copy {{ color: var(--sidebar-muted) !important; font-size: 0.9rem; line-height: 1.55; }}
 
     [data-testid="stSidebar"] .stButton > button {{
         justify-content: flex-start !important;
         width: 100%;
-        padding: 0.78rem 0.85rem !important;
+        padding: 0.82rem 0.75rem !important;
         border: 1px solid transparent !important;
         border-radius: 13px !important;
         background: transparent !important;
-        color: var(--sidebar-muted) !important;
+        color: var(--sidebar-text) !important;
         box-shadow: none !important;
-        font-size: 0.92rem !important;
-        font-weight: 700 !important;
+        font-size: 1rem !important;
+        font-weight: 650 !important;
         text-align: left !important;
     }}
     [data-testid="stSidebar"] .stButton > button:hover {{
         border-color: var(--sidebar-line) !important;
-        background: #282019 !important;
+        background: var(--surface-alt) !important;
         color: var(--sidebar-text) !important;
     }}
 
@@ -280,7 +246,7 @@ def render_app_styles(theme_mode):
         margin: 0.6rem 0 1rem;
         padding: 1.25rem 1.35rem;
         border: 1px solid var(--line);
-        border-left: 6px solid var(--orange);
+        border-left: 4px solid var(--primary);
         border-radius: var(--radius-md);
         background: var(--surface);
     }}
@@ -294,13 +260,13 @@ def render_app_styles(theme_mode):
         border-radius: var(--radius-md);
         background: var(--surface);
     }}
-    .info-card[data-tone="warm"] {{ background: var(--amber); border-color: var(--amber); }}
-    .info-card[data-tone="teal"] {{ background: var(--orange); border-color: var(--orange); }}
-    .info-card[data-tone="teal"] * {{ color: #fffaf2 !important; }}
+    .info-card[data-tone="warm"] {{ background: var(--primary-soft); border-color: var(--line); }}
+    .info-card[data-tone="teal"] {{ background: var(--primary); border-color: var(--primary); }}
+    .info-card[data-tone="teal"] * {{ color: #ffffff !important; }}
     .info-card-label {{ font-size: 0.72rem; font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase; }}
     .info-card-value {{ margin-top: 0.35rem; font-size: 1.75rem; font-weight: 900; letter-spacing: -0.05em; }}
     .info-card-copy {{ margin-top: 0.45rem; color: var(--muted) !important; font-size: 0.87rem; line-height: 1.4; }}
-    .info-card[data-tone="warm"] .info-card-copy {{ color: #5f4210 !important; }}
+    .info-card[data-tone="warm"] .info-card-copy {{ color: var(--muted) !important; }}
 
     [data-testid="stForm"] {{
         padding: clamp(1.1rem, 3vw, 2rem);
@@ -316,7 +282,7 @@ def render_app_styles(theme_mode):
         color: var(--ink) !important;
         box-shadow: none !important;
     }}
-    .stTextInput input:focus, .stTextArea textarea:focus {{ border-color: var(--orange) !important; }}
+    .stTextInput input:focus, .stTextArea textarea:focus {{ border-color: var(--primary) !important; }}
     .stTextInput input::placeholder, .stTextArea textarea::placeholder {{ color: var(--muted) !important; opacity: 0.8; }}
     .stTextInput label, .stTextArea label, .stSelectbox label, .stFileUploader label {{ font-weight: 750 !important; }}
 
@@ -333,14 +299,14 @@ def render_app_styles(theme_mode):
         color: inherit !important;
     }}
     .main .stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover {{
-        border-color: var(--orange) !important;
-        background: var(--orange) !important;
+        border-color: var(--primary) !important;
+        background: var(--primary) !important;
         color: #fff !important;
     }}
 
     .stFileUploader [data-testid="stFileUploaderDropzone"] {{
         padding: 1rem !important;
-        border: 2px dashed var(--amber) !important;
+        border: 2px dashed var(--primary) !important;
         border-radius: var(--radius-md) !important;
         background: var(--surface-alt) !important;
     }}
@@ -361,7 +327,7 @@ def render_app_styles(theme_mode):
     .main .stButton > button:focus-visible,
     .stFormSubmitButton > button:focus-visible,
     .stDownloadButton > button:focus-visible {{
-        outline: 3px solid var(--amber) !important;
+        outline: 3px solid var(--primary) !important;
         outline-offset: 3px;
     }}
 
@@ -373,7 +339,7 @@ def render_app_styles(theme_mode):
         background: var(--surface);
     }}
     .stTabs [data-baseweb="tab"] {{ padding: 0.65rem 0.9rem; border-radius: 13px; font-weight: 750; }}
-    .stTabs [aria-selected="true"] {{ background: var(--amber-soft); color: var(--ink) !important; }}
+    .stTabs [aria-selected="true"] {{ background: var(--primary-soft); color: var(--ink) !important; }}
     .stTabs [data-baseweb="tab-highlight"] {{ background: transparent !important; }}
 
     .skill-panel, .course-card {{
@@ -386,22 +352,21 @@ def render_app_styles(theme_mode):
     .skill-panel-subtitle, .course-panel-subtitle {{ margin: 0.3rem 0 0.8rem; color: var(--muted) !important; line-height: 1.5; }}
     .skill-chip-row {{ display: flex; flex-wrap: wrap; gap: 0.45rem; }}
     .skill-chip {{ padding: 0.42rem 0.78rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.84rem; font-weight: 700; }}
-    .skill-chip-emerald {{ background: var(--amber-soft); color: var(--ink) !important; }}
-    .skill-chip-amber {{ background: var(--amber); color: #191510 !important; }}
+    .skill-chip-emerald, .skill-chip-blue {{ background: var(--primary-soft); color: var(--ink) !important; }}
     .skill-chip-slate {{ background: var(--ink); color: var(--surface) !important; border-color: var(--ink); }}
     .skill-chip-muted {{ color: var(--muted) !important; }}
 
     .course-panel {{ margin: 1rem 0; }}
     .course-grid {{ display: grid; gap: 0.7rem; margin: 0.8rem 0 1.2rem; }}
     .course-card {{ display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1rem; text-decoration: none !important; }}
-    .course-card:hover {{ border-color: var(--orange); }}
-    .course-card-index {{ display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--amber); color: #191510 !important; font-size: 0.78rem; font-weight: 850; }}
+    .course-card:hover {{ border-color: var(--primary); }}
+    .course-card-index {{ display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--primary-soft); color: var(--ink) !important; font-size: 0.78rem; font-weight: 850; }}
     .course-card-body {{ display: flex; flex-direction: column; flex: 1; }}
     .course-card-title {{ font-weight: 750; }}
     .course-card-meta {{ color: var(--muted) !important; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em; }}
 
-    .stProgress > div > div > div > div {{ background: var(--orange); }}
-    .stSlider [role="slider"] {{ background: var(--orange) !important; border-color: var(--orange) !important; }}
+    .stProgress > div > div > div > div {{ background: var(--primary); }}
+    .stSlider [role="slider"] {{ background: var(--primary) !important; border-color: var(--primary) !important; }}
     .stExpander, [data-testid="stDataFrame"] {{ border: 1px solid var(--line) !important; border-radius: var(--radius-md) !important; overflow: hidden; }}
 
     header[data-testid="stHeader"] {{ background: color-mix(in srgb, var(--canvas) 92%, transparent) !important; }}
@@ -431,11 +396,6 @@ def hero_section():
             <div class="hero-kicker">Know what your resume proves</div>
             <h1 class="hero-title">Match your resume to the <span class="accent">work you want.</span></h1>
             <p class="hero-subtitle">Compare your resume with a real job description, see the evidence behind the score, and leave with specific improvements.</p>
-        </div>
-        <div class="hero-features">
-            <span class="hero-feature">ATS structure</span>
-            <span class="hero-feature">Requirement evidence</span>
-            <span class="hero-feature">PDF report</span>
         </div>
     </section>
     """

@@ -3,7 +3,7 @@
 import streamlit as st
 
 from ..api_client import BackendAPIError, ResumeAnalyzerClient
-from ..components.report import recommended_courses_for, render_analysis_report
+from ..components.report import recommended_courses_for
 from ..components.styles import section_card
 from ..services.pdf_parser import extract_text
 from ..services.storage import build_session_record
@@ -85,14 +85,6 @@ def render_candidate_page(database, client: ResumeAnalyzerClient):
             "pdf_content": pdf_content,
             "api_payload": api_payload,
         }
-        st.success("Analysis complete. Review the score, supporting evidence, and recommended changes below.")
-
-    result = st.session_state.get("latest_analysis")
-    if result:
-        render_analysis_report(
-            analysis=result["analysis"],
-            pdf_name=result["pdf_name"],
-            pdf_content=result["pdf_content"],
-            api_payload=result["api_payload"],
-            client=client,
-        )
+        st.session_state.nav_choice = "Results"
+        st.session_state.analysis_notice = "Analysis complete."
+        st.rerun()

@@ -40,7 +40,7 @@ def render_admin_page(database, theme_mode: str):
                     <div class="skill-panel-subtitle">This workspace includes candidate records, regional signals, score distribution, and feedback monitoring.</div>
                     <div class="skill-chip-row">
                         <span class="skill-chip skill-chip-emerald">Role Trends</span>
-                        <span class="skill-chip skill-chip-amber">Score Analytics</span>
+                        <span class="skill-chip skill-chip-blue">Score Analytics</span>
                         <span class="skill-chip skill-chip-slate">Geo Footprint</span>
                         <span class="skill-chip skill-chip-emerald">Feedback Pulse</span>
                     </div>

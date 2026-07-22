@@ -24,8 +24,8 @@ COURSE_LIBRARY = {
 def success_bullet(text):
     st.markdown(
         f"""
-        <div style="padding: 12px 15px; margin: 8px 0; background: linear-gradient(135deg, rgba(34, 197, 94, 0.16) 0%, rgba(34, 197, 94, 0.07) 100%); border-left: 4px solid #22c55e; border-radius: 14px;">
-            <span style="color: #22c55e; font-weight: 600;">✓</span>
+        <div style="padding: 12px 15px; margin: 8px 0; background: var(--surface-alt); border-left: 4px solid #2f7d5b; border-radius: 12px;">
+            <span style="color: #2f7d5b; font-weight: 600;">✓</span>
             <span style="color: var(--ink); margin-left: 10px; font-weight: 600;">{html.escape(str(text))}</span>
         </div>
         """,
@@ -36,8 +36,8 @@ def success_bullet(text):
 def warning_bullet(text):
     st.markdown(
         f"""
-        <div style="padding: 12px 15px; margin: 8px 0; background: linear-gradient(135deg, rgba(251, 146, 60, 0.14) 0%, rgba(251, 146, 60, 0.05) 100%); border-left: 4px solid #fb923c; border-radius: 14px;">
-            <span style="color: #fb923c; font-weight: 600;">○</span>
+        <div style="padding: 12px 15px; margin: 8px 0; background: var(--surface-alt); border-left: 4px solid #b65f56; border-radius: 12px;">
+            <span style="color: #b65f56; font-weight: 600;">○</span>
             <span style="color: var(--ink); margin-left: 10px; font-weight: 600;">{html.escape(str(text))}</span>
         </div>
         """,
@@ -103,7 +103,7 @@ def render_section_scorecards(section_scores):
         if matched_labels:
             render_skill_panel("Already covered", "Strong signals already present in your resume.", matched_labels, tone="emerald")
         if missing_labels:
-            render_skill_panel("Still missing", "Sections to strengthen in the next revision.", missing_labels, tone="amber")
+            render_skill_panel("Still missing", "Sections to strengthen in the next revision.", missing_labels, tone="blue")
 
 
 def render_bullet_quality_panel(bullet_quality):
@@ -235,7 +235,7 @@ def render_analysis_report(*, analysis: dict, pdf_name: str, pdf_content: bytes,
         st.markdown(section_card("Skills and role direction", "Skills found in the resume, likely role track, and the most useful gaps to address."), unsafe_allow_html=True)
         render_skill_panel("Your Current Skills", "Detected directly from your resume", candidate["skills"], tone="emerald")
         st.info(f"Our analysis suggests you are trending toward {summary['role_title']} roles. {summary['match_reason']}")
-        render_skill_panel("Recommended Skills For Your Next Iteration", "Add the strongest missing signals to improve role fit", summary["recommended_skills"], tone="amber")
+        render_skill_panel("Recommended Skills For Your Next Iteration", "Add the strongest missing signals to improve role fit", summary["recommended_skills"], tone="blue")
         render_course_recommender(COURSE_LIBRARY.get(summary["courses_key"], ds_course))
 
         if semantic_results:

@@ -69,7 +69,7 @@ def recommended_courses_for(analysis: dict, limit: int = 5) -> list[str]:
 
 def render_course_recommender(course_list):
     st.markdown(
-        "<section class='course-panel'><div class='course-panel-title'>Recommended Courses &amp; Certifications</div><div class='course-panel-subtitle'>A curated learning stack to strengthen the signal for your target direction.</div></section>",
+        "<section class='course-panel'><div class='course-panel-title'>Recommended courses &amp; certifications</div><div class='course-panel-subtitle'>Practical resources for the skills this role asks for.</div></section>",
         unsafe_allow_html=True,
     )
     recommendation_count = st.slider("Choose Number of Course Recommendations:", 1, 10, 5)
@@ -175,7 +175,7 @@ def render_interview_prep_panel(interview_prep):
                 for question in questions:
                     warning_bullet(question)
             else:
-                st.info("Add a target JD to unlock this section.")
+                st.info("Add a target job description to generate questions for this section.")
 
 
 def render_semantic_evidence_panel(semantic_results):
@@ -215,7 +215,7 @@ def render_analysis_report(*, analysis: dict, pdf_name: str, pdf_content: bytes,
         st.markdown(info_card("Candidate level", candidate["candidate_level"], f"{candidate['page_count']} page resume", "ink"), unsafe_allow_html=True)
     with summary_col4:
         semantic_score = f"{summary['semantic_match_score']}%" if summary["semantic_match_score"] is not None else "N/A"
-        semantic_note = "Based on your pasted JD." if semantic_results else "Add a JD to unlock matching."
+        semantic_note = "Based on your pasted job description." if semantic_results else "Add a job description to calculate this."
         st.markdown(info_card("JD match", semantic_score, semantic_note, "warm"), unsafe_allow_html=True)
 
     report_tabs = st.tabs(["Overview", "ATS Sections", "JD Gap", "Bullet Checker", "Interview Prep", "PDF Report"])
@@ -232,14 +232,14 @@ def render_analysis_report(*, analysis: dict, pdf_name: str, pdf_content: bytes,
         with info_col2:
             render_pdf_preview(pdf_content)
 
-        st.markdown(section_card("Skill intelligence", "Detected skills, likely track, and the strongest next-signal upgrades."), unsafe_allow_html=True)
+        st.markdown(section_card("Skills and role direction", "Skills found in the resume, likely role track, and the most useful gaps to address."), unsafe_allow_html=True)
         render_skill_panel("Your Current Skills", "Detected directly from your resume", candidate["skills"], tone="emerald")
         st.info(f"Our analysis suggests you are trending toward {summary['role_title']} roles. {summary['match_reason']}")
         render_skill_panel("Recommended Skills For Your Next Iteration", "Add the strongest missing signals to improve role fit", summary["recommended_skills"], tone="amber")
         render_course_recommender(COURSE_LIBRARY.get(summary["courses_key"], ds_course))
 
         if semantic_results:
-            st.markdown(section_card("Job match", "Embeddings compare your resume, the pasted JD, and curated role profiles."), unsafe_allow_html=True)
+            st.markdown(section_card("Job match", "Semantic matching compares your resume with the job description and reference role profiles."), unsafe_allow_html=True)
             match_cols = st.columns(len(semantic_results["role_matches"]))
             for index, role in enumerate(semantic_results["role_matches"]):
                 with match_cols[index]:
@@ -251,7 +251,7 @@ def render_analysis_report(*, analysis: dict, pdf_name: str, pdf_content: bytes,
                 f"Details: {semantic_error}"
             )
         else:
-            st.info("Paste a target job description above to unlock semantic role matching.")
+            st.info("Paste a target job description above to calculate semantic role matches.")
 
     with report_tabs[1]:
         st.markdown(section_card("Section-level ATS score", "The original 10 ATS checks are grouped into scored categories with visual bars."), unsafe_allow_html=True)
@@ -283,7 +283,7 @@ def render_analysis_report(*, analysis: dict, pdf_name: str, pdf_content: bytes,
                     height=320,
                 )
         else:
-            st.info("Add a target JD to unlock the resume-to-JD gap explainer.")
+            st.info("Add a target job description to generate the resume-to-job gap analysis.")
 
     with report_tabs[3]:
         render_bullet_quality_panel(analysis["bullet_quality"])

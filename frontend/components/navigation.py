@@ -6,10 +6,10 @@ import streamlit.components.v1 as components
 
 NAV_OPTIONS = ["User", "Feedback", "About", "Admin"]
 NAV_LABELS = {
-    "User": "Candidate Studio",
-    "Feedback": "Signal & Feedback",
-    "About": "About The Engine",
-    "Admin": "Admin Atlas",
+    "User": "Analyze resume",
+    "Feedback": "Feedback",
+    "About": "About",
+    "Admin": "Admin",
 }
 
 
@@ -53,9 +53,9 @@ def render_theme_picker():
 
     def _on_theme_change():
         st.session_state.theme_mode = {
-            "◫": "System",
-            "☀": "Light",
-            "☾": "Dark",
+            "Auto": "System",
+            "Light": "Light",
+            "Dark": "Dark",
         }[st.session_state.theme_selector]
 
     st.markdown(
@@ -65,7 +65,7 @@ def render_theme_picker():
     st.markdown("<div class='theme-switcher-module__q-SprW__root' data-small=''></div>", unsafe_allow_html=True)
     st.radio(
         "Theme mode",
-        ["◫", "☀", "☾"],
+        ["Auto", "Light", "Dark"],
         key="theme_selector",
         horizontal=True,
         label_visibility="collapsed",
@@ -85,10 +85,9 @@ def render_navigation() -> str:
     st.sidebar.markdown(
         """
         <div class='nav-stage'>
-            <div class='nav-kicker'>Control Deck</div>
-            <div class='nav-title'>Navigation</div>
-            <div class='nav-copy'>Move through the analyzer like chapters in a compact studio console.</div>
-            <div class='nav-orbit'></div>
+            <div class='nav-kicker'>Taskoora</div>
+            <div class='nav-title'>Resume review</div>
+            <div class='nav-copy'>Compare a resume with the role it is meant to win.</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -107,9 +106,8 @@ def render_navigation() -> str:
     st.sidebar.markdown(
         """
         <div style='padding: 12px 4px 2px 4px;'>
-            <div style='font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7;'>Studio Notes</div>
-            <div style='margin-top: 10px; font-size: 1rem; font-weight: 700;'>Career intelligence</div>
-            <div style='font-size: 0.95rem; opacity: 0.86; margin-top: 8px;'>Compare resumes to target roles with role-fit analysis and focused skill advice.</div>
+            <div style='font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber) !important; font-weight: 800;'>How it works</div>
+            <div style='font-size: 0.9rem; line-height: 1.55; color: var(--sidebar-muted) !important; margin-top: 8px;'>Upload a PDF, paste the job description, and review the evidence behind each result.</div>
         </div>
         """,
         unsafe_allow_html=True,

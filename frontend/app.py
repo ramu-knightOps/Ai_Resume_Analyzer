@@ -22,7 +22,7 @@ st.set_page_config(
 
 def _initialize_session():
     st.session_state.setdefault("theme_mode", "System")
-    st.session_state.setdefault("theme_selector", "◫")
+    st.session_state.setdefault("theme_selector", "Auto")
     st.session_state.setdefault("nav_choice", "User")
 
 

@@ -21,7 +21,7 @@ def _validate_contact(name: str, email: str, mobile: str, pdf_file) -> bool:
 
 def render_candidate_page(database, client: ResumeAnalyzerClient):
     st.markdown(
-        section_card("Candidate workspace", "Upload a resume, add a job description, and get a more realistic fit review."),
+        section_card("Start your review", "Add your details, the target job description, and a PDF resume."),
         unsafe_allow_html=True,
     )
 
@@ -37,17 +37,17 @@ def render_candidate_page(database, client: ResumeAnalyzerClient):
         job_description = st.text_area(
             "Target Job Description",
             height=180,
-            placeholder="Paste a job description here to unlock semantic role search, fit scoring, and skill-gap analysis.",
+            placeholder="Paste the job description here. The analysis will compare its requirements with evidence in your resume.",
         )
-        pdf_file = st.file_uploader("Choose your Resume", type=["pdf"])
-        submitted = st.form_submit_button("Analyze Resume", width="stretch")
+        pdf_file = st.file_uploader("Upload resume", type=["pdf"])
+        submitted = st.form_submit_button("Analyze resume", width="stretch")
 
     if submitted:
         if not _validate_contact(name, email, mobile, pdf_file):
             return
 
         pdf_content = pdf_file.getvalue()
-        with st.spinner("Reading PDF and asking the backend for analysis..."):
+        with st.spinner("Reading your resume and comparing it with the role..."):
             try:
                 resume_text = extract_text(pdf_content)
                 api_payload = {
@@ -85,7 +85,7 @@ def render_candidate_page(database, client: ResumeAnalyzerClient):
             "pdf_content": pdf_content,
             "api_payload": api_payload,
         }
-        st.success("Analysis complete. Your resume has been reviewed, scored, and mapped to likely role directions.")
+        st.success("Analysis complete. Review the score, supporting evidence, and recommended changes below.")
 
     result = st.session_state.get("latest_analysis")
     if result:

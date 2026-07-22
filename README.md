@@ -10,6 +10,12 @@ AI Resume Analyzer is a portfolio-grade Streamlit application and HTTP API that 
 
 The application is designed as a decision-support tool. Its scores and suggestions help candidates review a resume; they do not reproduce a specific employer's ATS or guarantee an interview.
 
+## Screenshots
+
+![AI Resume Analyzer report overview](images/resume-report-overview.png)
+
+![Resume report detail with PDF preview](images/resume-report-detail.png)
+
 ## Highlights
 
 - Parses PDF resumes and recovers contact details, education, sections, and skills.

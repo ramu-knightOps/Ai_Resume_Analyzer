@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resume-analyzer"
+version = "1.0.0"
+description = "ATS-style resume analysis with a Streamlit UI and HTTP API."
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*", "frontend*"]
+
+[tool.setuptools.package-data]
+backend = ["app/assets/fonts/*.ttf", "app/assets/fonts/*.txt"]
+frontend = ["assets/fonts/*.ttf", "assets/fonts/*.txt", "assets/images/*.png"]

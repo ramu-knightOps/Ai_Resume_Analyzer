@@ -1,12 +1,6 @@
-import sys
 import unittest
-from pathlib import Path
 
-
-APP_DIR = Path(__file__).resolve().parents[1] / "App"
-sys.path.insert(0, str(APP_DIR))
-
-from parser_utils import (
+from backend.app.core.parser import (
     extract_degrees,
     extract_email,
     extract_name,

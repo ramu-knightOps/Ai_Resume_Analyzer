@@ -1,6 +1,7 @@
 .DS_Store
 .env
 .env.*
+!.env.example
 .venv/
 venv/
 env/
@@ -18,18 +19,12 @@ __pycache__/
 .mypy_cache/
 .coverage
 htmlcov/
+tmp/
 
-App/.env
-App/.streamlit/
-App/__pycache__/
-App/Uploaded_Resumes/
-tests/__pycache__/
-pyresparser/__pycache__/
+data/uploads/
 
 *.log
+*.db
 *.sqlite3
 
 .streamlit/secrets.toml
-RESUME ANALYSER SYNOPSIS.pdf
-screenshots/
-App/.env.example

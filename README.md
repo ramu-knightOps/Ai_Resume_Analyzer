@@ -1,194 +1,105 @@
-# ATS Resume Analyzer
+# Resume Analyzer
 
-An intelligent resume analysis platform that combines hybrid resume parsing, semantic matching, ATS-style scoring, JD gap detection, bullet-quality feedback, interview prep, and PDF reporting in one workflow. 📄
+Resume Analyzer is a Streamlit application and lightweight HTTP API for evaluating resumes against a target job description. It extracts resume details, scores ATS coverage, identifies skill gaps, reviews bullet quality, and generates a PDF report.
 
-Built with Streamlit and Python, the project is designed to help candidates understand how well their resume matches a target role and what to improve next. It also includes a lightweight API layer and an upgraded admin analytics console for monitoring usage and feedback.
+## Features
 
-## Highlights ✨
+- Resume PDF parsing with a deterministic fallback
+- ATS-style section scoring and role-fit suggestions
+- Resume-to-job-description skill gap analysis
+- Evidence-backed JD requirement mapping with exact supporting resume lines
+- Bullet improvement suggestions and interview preparation prompts
+- PDF report generation
+- Admin analytics backed by SQLite or PostgreSQL
+- JSON API for reusing the analysis services
 
-- Hybrid parser that reduces dependence on `pyresparser`
-- Embedding-based resume-to-JD matching with vector-style semantic scoring
-- Canonical skill normalization and resume-text evidence recovery
-- Section-level ATS scoring with grouped category bars
-- Bullet-quality checker with rewrite suggestions
-- Resume-to-JD gap explainer across `Skills`, `Tools`, `Domain`, and `Evidence`
-- Interview prep question generation from resume + JD context
-- Downloadable PDF analysis report
-- Admin Console v2 with cleaner visual analytics
-- REST API for reusable analysis endpoints
-
-## How It Works 🧠
-
-1. A resume PDF is uploaded and converted into raw text.
-2. A hybrid parser extracts name, contact info, degrees, sections, and skills.
-3. Resume skills are normalized against a skill ontology with aliases.
-4. Resume evidence and JD text are compared using semantic matching and fallback heuristics.
-5. The app produces ATS scorecards, role-fit suggestions, gap insights, and targeted recommendations.
-
-## Feature Set
-
-### Candidate Experience
-
-- Resume parsing from PDF uploads
-- Skill recovery from parser output and raw resume text
-- ATS-style section scoring with grouped visual categories
-- Semantic role matching against curated role profiles
-- Priority gap analysis from JD text
-- Recovered semantic evidence display
-- Bullet-strength review with suggestions
-- Interview preparation questions
-- Recommended courses and learning resources
-- PDF report export
-
-### Admin Experience
-
-- Secure admin login via environment variables
-- Executive metrics for processed profiles and feedback pulse
-- Role, geography, and score analytics
-- Feedback stream and record tables
-- Candidate data export
-
-### API
-
-- Health check endpoint
-- Full resume analysis endpoint
-- Bullet-quality endpoint
-- JD gap endpoint
-- Interview-prep endpoint
-- PDF report generation endpoint
-
-## Project Structure 🗂️
+## Project layout
 
 ```text
-AI-Resume-Analyzer/
-├── App/
-│   ├── App.py
-│   ├── analysis_data.py
-│   ├── api_server.py
-│   ├── parser_utils.py
-│   ├── matching_utils.py
-│   ├── resume_analysis_core.py
-│   ├── ui_styles.py
-│   ├── Courses.py
-│   └── requirements.txt
-├── pyresparser/
-├── screenshots/
-├── tests/
-└── README.md
+.
+├── backend/app/
+│   ├── api/routes/                # HTTP route modules
+│   ├── models/                    # Domain and persistence models
+│   ├── schemas/                   # API request and response contracts
+│   ├── services/                  # Resume analysis use cases
+│   └── main.py                    # Backend server entry point
+├── frontend/
+│   ├── app.py                     # Streamlit frontend launcher
+│   └── api_client.py              # HTTP connection to the backend
+├── tests/                         # Unit and API integration tests
+├── data/                          # Local runtime data (ignored except .gitkeep)
+├── docs/                          # Screenshots and project reference material
+├── requirements.txt               # Core dependencies
+├── requirements/                  # Optional semantic and development extras
+├── Dockerfile
+├── start.sh
+└── pyproject.toml
 ```
-
-## Tech Stack 🛠️
-
-- Python
-- Streamlit
-- Plotly
-- PostgreSQL with `psycopg2`
-- SQLite fallback for prototype deployments
-- `pdfminer3`
-- `sentence-transformers`
-- `python-dotenv`
-- optional `pyresparser` augmentation
 
 ## Setup
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/ramu-knightOps/Ai_Resume_Analyzer.git
-cd Ai_Resume_Analyzer/AI-Resume-Analyzer
-```
-
-### 2. Create a virtual environment
+Requires Python 3.11 or newer.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-On Windows:
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### 3. Install dependencies
-
-```bash
-cd App
 pip install -r requirements.txt
+pip install -e .
 ```
 
-### 4. Configure environment variables
-
-Create `App/.env`:
-
-```env
-SQLITE_DB_PATH=App/resume_analyzer.db
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=your_database
-DB_USER=your_user
-DB_PASSWORD=your_password
-HF_TOKEN=optional_huggingface_token
-ADMIN_USERNAME=your_admin_username
-ADMIN_PASSWORD=your_admin_password
-ADMIN_CREDENTIALS=admin_one:password_one,admin_two:password_two
-```
-
-For a quick prototype, you can skip the PostgreSQL variables and let the app use local SQLite storage automatically.
-
-## Run the App 🚀
-
-From the `App` directory:
+Optional local embedding support:
 
 ```bash
-streamlit run App.py
+pip install -r requirements/semantic.txt
 ```
 
-## Railway Deploy 🚂
-
-This repo includes `nixpacks.toml` and `start.sh`, so Railway can build and run the Streamlit app directly.
-
-Recommended prototype setup:
-
-```env
-SQLITE_DB_PATH=App/resume_analyzer.db
-ADMIN_CREDENTIALS=admin_one:password_one,admin_two:password_two
-HF_TOKEN=optional_huggingface_token
-```
-
-If you want persistent shared analytics across deployments, add PostgreSQL too:
-
-```env
-DB_HOST=...
-DB_PORT=5432
-DB_NAME=...
-DB_USER=...
-DB_PASSWORD=...
-```
-
-Railway start command:
+Development tools:
 
 ```bash
-bash ./start.sh
+pip install -r requirements/dev.txt
 ```
 
-## Run the API
+## Configuration
 
-From the `App` directory:
+Copy the environment template and update only the values you need:
 
 ```bash
-python api_server.py
+cp .env.example .env
 ```
 
-Base URL:
+SQLite works without PostgreSQL configuration. For PostgreSQL, provide all of `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`.
 
-```text
-http://127.0.0.1:8001
+Set either `ADMIN_CREDENTIALS` or the `ADMIN_USERNAME` and `ADMIN_PASSWORD` pair to enable the admin console.
+
+## Run
+
+Start the backend first:
+
+```bash
+python -m backend.app.main
 ```
 
-## API Endpoints
+Then, in a second terminal, start the Streamlit frontend:
+
+```bash
+streamlit run app.py
+```
+
+Or use the deployment entry point:
+
+```bash
+bash start.sh
+```
+
+The frontend sends resume analysis requests to `http://127.0.0.1:8001` by default. Set `BACKEND_API_URL` when the backend runs elsewhere.
+
+Start the API directly on `http://127.0.0.1:8001`:
+
+```bash
+python -m backend.app.main
+```
+
+Available API endpoints:
 
 - `GET /api/v1/health`
 - `POST /api/v1/analyses`
@@ -197,65 +108,20 @@ http://127.0.0.1:8001
 - `POST /api/v1/analyses/interview-prep`
 - `POST /api/v1/reports/pdf`
 
-### Example Request
+## Test
 
 ```bash
-curl -X POST http://127.0.0.1:8001/api/v1/analyses \
-  -H "Content-Type: application/json" \
-  -d '{
-    "candidate_name": "Asha",
-    "resume_text": "Built APIs with FastAPI, Docker, PostgreSQL, and analytics dashboards.",
-    "resume_skills": ["Python", "SQL", "Docker"],
-    "job_description": "Looking for a backend engineer with FastAPI, Docker, authentication, and fintech API experience."
-  }'
+coverage run --source=backend.app -m unittest discover -s tests -v
+coverage report -m --fail-under=80
 ```
 
-## Testing ✅
+The current test suite covers the API, parsing, matching, evidence-backed requirement mapping, analysis, PDF fallback, and package structure.
+It currently contains 35 tests and reaches 94% backend coverage.
 
-From the project root:
+## Deployment
 
-```bash
-python3 -m unittest tests/test_matching_utils.py tests/test_parser_utils.py
-```
-
-To validate syntax:
-
-```bash
-python3 -m py_compile App/App.py App/parser_utils.py App/matching_utils.py App/resume_analysis_core.py
-```
-
-## Notes
-
-- The parser now uses a hybrid strategy: custom text extraction first, optional `pyresparser` support second.
-- Semantic matching works best when the embedding model can load successfully.
-- If PostgreSQL is not configured, the app automatically falls back to SQLite so the prototype can still run.
-- Uploaded resumes and local env files should remain untracked.
-- Admin console access should be configured locally through `ADMIN_CREDENTIALS`, or through the fallback `ADMIN_USERNAME` and `ADMIN_PASSWORD` pair.
-
-## Git Hygiene
-
-This repo ignores local-only development files such as:
-
-- virtual environments
-- uploaded resumes
-- Python caches
-- local `.env` files
-- macOS metadata files
-
-If any of those were tracked earlier, remove them once with:
-
-```bash
-git rm -r --cached App/Uploaded_Resumes App/__pycache__ tests/__pycache__ pyresparser/__pycache__
-git rm --cached .DS_Store
-```
-
-## Roadmap 📌
-
-- Improve section-aware project and experience extraction
-- Add stronger bullet-level impact scoring
-- Expand role coverage and recommendation quality further
-- Add evaluation datasets for resume/JD matching quality
+The included `Dockerfile`, `nixpacks.toml`, and `start.sh` are ready for container or Railway-style deployments. Persist `data/` only for local prototypes; use PostgreSQL for shared deployment data.
 
 ## License
 
-This project is distributed under the license included in [LICENSE](/Users/raghusmac/Documents/ai_reseme_cloned_version/AI-Resume-Analyzer/LICENSE).
+See [LICENSE](LICENSE).

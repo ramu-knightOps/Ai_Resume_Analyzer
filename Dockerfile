@@ -7,14 +7,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY App/requirements.txt /app/App/requirements.txt
+COPY requirements.txt /app/requirements.txt
 
 RUN python -m pip install --upgrade pip && \
-    python -m pip install -r /app/App/requirements.txt
+    python -m pip install -r /app/requirements.txt
 
 COPY . /app
 
-RUN chmod +x /app/start.sh && mkdir -p /app/App/Uploaded_Resumes
+RUN python -m pip install . && \
+    chmod +x /app/start.sh && mkdir -p /app/data/uploads
 
 EXPOSE 8501
 

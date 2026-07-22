@@ -1,13 +1,20 @@
-# import math
-# import os
+import math
 import os
 import re
+from collections import Counter
 from .analysis_data import ROLE_CATALOG,SECTION_RULES,SKILL_ONTOLOGY
-import streamlit as st
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
+CUSTOM_STOPWORDS = {
+    "looking", "seeking", "candidate", "responsible",
+    "requirements", "required", "ideal", "someone"
+}
+
+stopwords = ENGLISH_STOP_WORDS | CUSTOM_STOPWORDS
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 TOKEN_PATTERN = re.compile(r"[a-zA-Z][a-zA-Z0-9+#./-]{1,}")
 WORD_BOUNDARY_TEMPLATE = r"(?<![a-z0-9]){}(?![a-z0-9])"
+
 
 def normalize_text(text):
     return re.sub(r"\s+"," ",(text or "")).strip()
@@ -17,12 +24,6 @@ def normalize_token(text):
 
 def extract_keywords(text):
     tokens=[token.lower() for token in TOKEN_PATTERN.findall(text or "")]
-    stopwords = {
-        "with", "that", "this", "from", "into", "have", "your", "will", "they",
-        "their", "about", "using", "used", "build", "role", "team", "work",
-        "years", "year", "must", "should", "good", "strong", "ability", "skills",
-        "experience", "knowledge", "and", "the", "for", "are", "you", "our"
-    }
     filtered=[token for token in tokens if token not in stopwords and len(token)>2]
     return list(dict.fromkeys(filtered))
 
@@ -213,7 +214,7 @@ def infer_candidate_level(page_count,resume_text):
             lowered
         )
     )
-    if max_years>=4 or internship_hits or project_hits>=2:
+    if max_years >= 4 or experience_hits:
         return "Experienced"
     if max_years >= 1 or internship_hits or project_hits >= 2:
         return "Intermediate"
@@ -291,6 +292,21 @@ def cosine_similarity(vec_a,vec_b):
         return 0.0
     return dot/(magnitude_b*magnitude_a)
 
+def _rank_vectors(query_vector, candidates, metadata, top_k):
+    scored = [
+        (cosine_similarity(query_vector, vector), item)
+        for item, vector in zip(metadata, candidates)
+    ]
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return scored[:top_k]
+
+def _fallback_similarity(query_text, candidate_text):
+    query_tokens = set(extract_keywords(query_text))
+    candidate_tokens = set(extract_keywords(candidate_text))
+    if not query_tokens or not candidate_tokens:
+        return 0.0
+    return len(query_tokens.intersection(candidate_tokens)) / len(query_tokens)
+
 def load_embedding_model():
     from sentence_transformers import SentenceTransformer
     hf_token=os.getenv("HF_TOKEN")
@@ -326,37 +342,114 @@ def build_vector_indexes():
         "skill_texts":skill_doc,
     }
 
-def compute_semantic_matches(
-            job_description,resume_text,resume_skills):
-    jd_keywords=extract_keywords(job_description)
-    resume_evidence=extract_resume_evidence(resume_text,resume_skills)
+def compute_semantic_matches(job_description, resume_text, resume_skills, top_k=3):
+    normalized_job = normalize_text(job_description)
+    normalized_resume = normalize_text(resume_text)
+    resume_evidence = extract_resume_evidence(resume_text, resume_skills)
+    resume_skill_set = {skill.lower() for skill in resume_evidence.keys()}
+
+    try:
+        indexes = build_vector_indexes()
+        model = indexes["model"]
+        job_vector, resume_vector = model.encode(
+            [normalized_job, normalized_resume], convert_to_numpy=True
+        )
+        role_matches = []
+        for role, role_vector in zip(ROLE_CATALOG, indexes["role_vectors"]):
+            job_score = cosine_similarity(job_vector, role_vector)
+            resume_score = cosine_similarity(resume_vector, role_vector)
+            role_skills = {canonicalize_skill(keyword).lower() for keyword in role["keywords"]}
+            keyword_alignment = len(resume_skill_set.intersection(role_skills)) / max(len(role_skills), 1)
+            blended_score = (job_score * 0.45) + (resume_score * 0.35) + (keyword_alignment * 0.20)
+            role_matches.append({
+                "title": role["title"],
+                "field": role["field"],
+                "summary": role["summary"],
+                "recommended_skills": role["recommended_skills"],
+                "score": round(blended_score * 100, 1),
+                "job_similarity": round(job_score * 100, 1),
+                "resume_similarity": round(resume_score * 100, 1),
+                "keyword_alignment": round(keyword_alignment * 100, 1),
+            })
+        role_matches.sort(key=lambda item: item["score"], reverse=True)
+        ranked_skills = _rank_vectors(job_vector, indexes["skill_vectors"], SKILL_ONTOLOGY, 16)
+        jd_skill_matches = []
+        missing_keywords = []
+        for score, entry in ranked_skills:
+            if score < 0.22:
+                continue
+            present = entry["name"].lower() in resume_skill_set
+            jd_skill_matches.append({
+                "skill": entry["name"],
+                "category": entry["category"],
+                "score": round(score * 100, 1),
+                "present_in_resume": present,
+            })
+            if not present:
+                missing_keywords.append(entry["name"])
+        resume_job_similarity = cosine_similarity(job_vector, resume_vector)
+    except Exception:
+        role_matches = []
+        for role in ROLE_CATALOG:
+            role_document = f"{role['title']} {role['summary']} {' '.join(role['keywords'])}"
+            job_score = _fallback_similarity(normalized_job, role_document)
+            resume_score = _fallback_similarity(normalized_resume, role_document)
+            role_skills = {canonicalize_skill(keyword).lower() for keyword in role["keywords"]}
+            keyword_alignment = len(resume_skill_set.intersection(role_skills)) / max(len(role_skills), 1)
+            blended_score = (job_score * 0.45) + (resume_score * 0.35) + (keyword_alignment * 0.20)
+            role_matches.append({
+                "title": role["title"],
+                "field": role["field"],
+                "summary": role["summary"],
+                "recommended_skills": role["recommended_skills"],
+                "score": round(blended_score * 100, 1),
+                "job_similarity": round(job_score * 100, 1),
+                "resume_similarity": round(resume_score * 100, 1),
+                "keyword_alignment": round(keyword_alignment * 100, 1),
+            })
+        role_matches.sort(key=lambda item: item["score"], reverse=True)
+        jd_skill_matches = []
+        missing_keywords = []
+        for entry in SKILL_ONTOLOGY:
+            score = _fallback_similarity(
+                normalized_job,
+                f"{entry['name']} {' '.join(entry.get('aliases', []))}",
+            )
+            if score <= 0:
+                continue
+            present = entry["name"].lower() in resume_skill_set
+            jd_skill_matches.append({
+                "skill": entry["name"],
+                "category": entry["category"],
+                "score": round(score * 100, 1),
+                "present_in_resume": present,
+            })
+            if not present:
+                missing_keywords.append(entry["name"])
+        jd_skill_matches.sort(key=lambda item: item["score"], reverse=True)
+        resume_job_similarity = _fallback_similarity(normalized_job, normalized_resume)
+
+    priority_keywords = [
+        item["skill"] for item in jd_skill_matches if not item["present_in_resume"]
+    ]
+    lexical_priority = [
+        canonicalize_skill(keyword)
+        for keyword, _ in Counter(extract_keywords(job_description)).most_common(12)
+        if canonicalize_skill(keyword).lower() not in resume_skill_set
+    ]
+    merged_priority = list(dict.fromkeys([*priority_keywords, *lexical_priority]))
     return {
-        "resume_job_similarity": 0,
-        "role_matches": [],
-        "jd_skill_matches": [],
+        "resume_job_similarity": round(resume_job_similarity * 100, 1),
+        "role_matches": role_matches[:top_k],
+        "jd_skill_matches": jd_skill_matches[:12],
         "resume_skill_evidence": list(resume_evidence.values()),
-        "missing_keywords": jd_keywords,
-        "priority_keywords": jd_keywords[:8],
+        "missing_keywords": missing_keywords[:12],
+        "priority_keywords": merged_priority[:8],
     }
 
-result = compute_semantic_matches(
-    "Looking for FastAPI Docker PostgreSQL",
-    "Built APIs with FastAPI and Postgres",
-    ["Python"]
-)
-
-print(result["priority_keywords"])
-print([item["skill"] for item in result["resume_skill_evidence"]])
-        
-
-
-            
-
-
-    
-
-
-        
-
-
-
+def build_resume_highlights(resume_data):
+    name = resume_data.get("name") or "Candidate"
+    skills = ", ".join(resume_data.get("skills") or [])
+    degree = ", ".join(resume_data.get("degree") or []) if resume_data.get("degree") else "Not specified"
+    pages = resume_data.get("no_of_pages") or 0
+    return f"{name} has a resume with {pages} pages. Education: {degree}. Skills: {skills}."

@@ -220,6 +220,70 @@ def build_gap_explainer(job_description: str, resume_text: str, resume_skills: l
     }
 
 
+def build_requirement_evidence_matrix(
+    job_description: str,
+    resume_text: str,
+    resume_skills: list[str],
+    semantic_results: dict[str, Any] | None = None,
+    limit: int = 12,
+) -> dict[str, Any]:
+    if not normalize_text(job_description):
+        return {
+            "requirements": [],
+            "matched_count": 0,
+            "total_count": 0,
+            "coverage_percent": 0.0,
+            "summary": "Add a target job description to generate evidence-backed requirement mapping.",
+        }
+
+    candidates = []
+    if semantic_results:
+        candidates = [item.get("skill", "") for item in semantic_results.get("jd_skill_matches", [])]
+    if not candidates:
+        candidates = extract_keywords(job_description)
+
+    requirements = []
+    seen = set()
+    resume_lines = [normalize_text(line) for line in (resume_text or "").splitlines() if normalize_text(line)]
+    normalized_skills = {normalize_text(skill).lower() for skill in resume_skills or []}
+
+    for candidate in candidates:
+        requirement = normalize_text(str(candidate))
+        key = requirement.lower()
+        if not key or key in seen or len(key) < 2:
+            continue
+        seen.add(key)
+
+        evidence = next((line for line in resume_lines if key in line.lower()), "")
+        listed_skill = key in normalized_skills
+        matched = bool(evidence or listed_skill)
+        if not evidence and listed_skill:
+            evidence = "Listed in parsed resume skills."
+        if len(evidence) > 180:
+            evidence = evidence[:177].rstrip() + "..."
+
+        requirements.append(
+            {
+                "requirement": requirement,
+                "status": "Matched" if matched else "Missing",
+                "evidence": evidence,
+            }
+        )
+        if len(requirements) >= limit:
+            break
+
+    matched_count = sum(item["status"] == "Matched" for item in requirements)
+    total_count = len(requirements)
+    coverage_percent = round((matched_count / total_count) * 100, 1) if total_count else 0.0
+    return {
+        "requirements": requirements,
+        "matched_count": matched_count,
+        "total_count": total_count,
+        "coverage_percent": coverage_percent,
+        "summary": f"Found resume evidence for {matched_count} of {total_count} prioritized JD capabilities.",
+    }
+
+
 def generate_interview_prep(job_description: str, resume_skills: list[str], role_title: str) -> dict[str, Any]:
     jd_keywords = extract_keywords(job_description)[:8]
     skill_keywords = [skill for skill in (resume_skills or [])[:6]]
@@ -268,6 +332,12 @@ def build_full_analysis(resume_data: dict[str, Any], resume_text: str, job_descr
         "categorized_missing_keywords": {},
         "summary": "Add a target job description to unlock gap analysis.",
     }
+    requirement_evidence = build_requirement_evidence_matrix(
+        job_description,
+        resume_text,
+        resume_skills,
+        semantic_results,
+    )
     interview_prep = generate_interview_prep(job_description, resume_skills, role_summary["title"]) if normalize_text(job_description) else {
         "technical_questions": [],
         "project_questions": [],
@@ -298,6 +368,7 @@ def build_full_analysis(resume_data: dict[str, Any], resume_text: str, job_descr
         "ats_section_scores": section_scores,
         "bullet_quality": bullet_quality,
         "gap_explainer": gap_explainer,
+        "requirement_evidence": requirement_evidence,
         "semantic_results": semantic_results,
         "semantic_error": semantic_error,
         "interview_prep": interview_prep,
@@ -330,7 +401,11 @@ def _build_pdf_report_lines(report_title: str, analysis: dict[str, Any]) -> list
         lines.append(f"- Original: {finding['original']}")
         lines.append(f"  Rewrite: {finding['suggestion']}")
 
-    lines.extend(["", "JD Gap Summary:", analysis["gap_explainer"]["summary"], "", "Interview Prep Questions:"])
+    lines.extend(["", "JD Gap Summary:", analysis["gap_explainer"]["summary"], "", "Requirement Evidence:"])
+    for item in analysis["requirement_evidence"]["requirements"][:8]:
+        evidence = f" - {item['evidence']}" if item["evidence"] else ""
+        lines.append(f"- {item['requirement']}: {item['status']}{evidence}")
+    lines.extend(["", "Interview Prep Questions:"])
     for question in analysis["interview_prep"]["technical_questions"][:3]:
         lines.append(f"- {question}")
     for question in analysis["interview_prep"]["project_questions"][:2]:

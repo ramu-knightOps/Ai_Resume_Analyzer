@@ -1,15 +1,11 @@
 import json
-import os
-import sys
 import threading
 import time
 import unittest
 import urllib.error
 import urllib.request
 
-sys.path.insert(0, os.path.dirname(__file__))
-
-from api_server import create_server
+from backend.app.main import create_server
 
 
 SAMPLE_RESUME = """
@@ -48,11 +44,36 @@ class ResumeAnalysisAPITestCase(unittest.TestCase):
         )
         return urllib.request.urlopen(request)
 
+    def read_http_error(self, request):
+        with self.assertRaises(urllib.error.HTTPError) as context:
+            urllib.request.urlopen(request)
+        response = context.exception
+        payload = json.loads(response.read().decode("utf-8"))
+        response.close()
+        return response.code, payload
+
     def test_health_endpoint(self):
         response = urllib.request.urlopen(f"http://127.0.0.1:{self.port}/api/v1/health")
         payload = json.loads(response.read().decode("utf-8"))
         self.assertEqual(response.status, 200)
         self.assertEqual(payload["data"]["status"], "ok")
+
+    def test_unknown_endpoint_returns_json_404(self):
+        request = urllib.request.Request(f"http://127.0.0.1:{self.port}/missing")
+        status, payload = self.read_http_error(request)
+        self.assertEqual(status, 404)
+        self.assertEqual(payload["error"]["code"], "not_found")
+
+    def test_invalid_json_returns_400(self):
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self.port}/api/v1/analyses",
+            data=b"{not-json",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        status, payload = self.read_http_error(request)
+        self.assertEqual(status, 400)
+        self.assertEqual(payload["error"]["code"], "invalid_json")
 
     def test_analysis_endpoint(self):
         response = self.post_json(
@@ -69,12 +90,38 @@ class ResumeAnalysisAPITestCase(unittest.TestCase):
         self.assertEqual(payload["data"]["candidate"]["name"], "Asha")
         self.assertIn("ats_section_scores", payload["data"])
         self.assertIn("bullet_quality", payload["data"])
+        self.assertIn("requirement_evidence", payload["data"])
+        self.assertGreater(payload["data"]["requirement_evidence"]["total_count"], 0)
 
     def test_bullet_quality_endpoint(self):
         response = self.post_json("/api/v1/analyses/bullet-quality", {"resume_text": SAMPLE_RESUME})
         payload = json.loads(response.read().decode("utf-8"))
         self.assertEqual(response.status, 200)
         self.assertGreaterEqual(len(payload["data"]["flagged_bullets"]), 1)
+
+    def test_interview_prep_endpoint(self):
+        response = self.post_json(
+            "/api/v1/analyses/interview-prep",
+            {
+                "job_description": SAMPLE_JD,
+                "resume_skills": ["Python", "SQL"],
+                "role_title": "Backend Engineer",
+            },
+        )
+        payload = json.loads(response.read().decode("utf-8"))
+        self.assertEqual(response.status, 200)
+        self.assertGreater(len(payload["data"]["technical_questions"]), 0)
+
+    def test_unknown_post_endpoint_returns_json_404(self):
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self.port}/missing",
+            data=b"{}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        status, payload = self.read_http_error(request)
+        self.assertEqual(status, 404)
+        self.assertEqual(payload["error"]["code"], "not_found")
 
     def test_gap_endpoint_requires_fields(self):
         request = urllib.request.Request(
@@ -104,7 +151,7 @@ class ResumeAnalysisAPITestCase(unittest.TestCase):
         payload = response.read()
         self.assertEqual(response.status, 200)
         self.assertEqual(response.headers.get_content_type(), "application/pdf")
-        self.assertTrue(payload.startswith(b"%PDF-1.4"))
+        self.assertTrue(payload.startswith(b"%PDF-"))
 
 
 if __name__ == "__main__":

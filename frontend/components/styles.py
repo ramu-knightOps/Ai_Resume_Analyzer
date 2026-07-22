@@ -1,3 +1,6 @@
+import base64
+from pathlib import Path
+
 LIGHT_THEME = {
     "bg_start": "#fbf6ef",
     "bg_end": "#f3ece1",
@@ -54,6 +57,9 @@ DARK_THEME = {
     "shadow": "0 12px 34px rgba(0, 0, 0, 0.22)",
 }
 
+_FONT_PATH = Path(__file__).resolve().parents[1] / "assets" / "fonts" / "BBHBartle-Regular.ttf"
+_TASKOORA_FONT_BASE64 = base64.b64encode(_FONT_PATH.read_bytes()).decode("ascii") if _FONT_PATH.exists() else ""
+
 
 def _theme_vars_css(values):
     return "\n".join([
@@ -109,6 +115,13 @@ def render_app_styles(theme_mode):
 
     return f"""
 <style>
+    @font-face {{
+        font-family: "Taskoora Display";
+        src: url("data:font/ttf;base64,{_TASKOORA_FONT_BASE64}") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+    }}
+
     :root {{
 {root_css}
         --radius-xl: 28px;
@@ -137,6 +150,32 @@ def render_app_styles(theme_mode):
     h1, h2, h3, h4 {{
         font-family: Georgia, "Times New Roman", serif;
         letter-spacing: -0.02em;
+    }}
+
+    .taskoora-wordmark {{
+        margin: 0.8rem 0 0.4rem 0;
+        font-family: "Taskoora Display", Georgia, "Times New Roman", serif;
+        font-size: clamp(4rem, 11vw, 10rem);
+        line-height: 0.88;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+        color: #f5f5f3;
+        text-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.98),
+            0 10px 24px rgba(15, 23, 34, 0.05);
+    }}
+
+    .taskoora-subtitle {{
+        font-size: 1.05rem;
+        max-width: 820px;
+        color: var(--muted);
+        margin: 0;
+    }}
+
+    @media (max-width: 720px) {{
+        .taskoora-wordmark {{
+            font-size: clamp(3rem, 18vw, 5.25rem);
+        }}
     }}
 
     [data-testid="stSidebar"] {{
@@ -803,10 +842,8 @@ def hero_section():
             <div style="display:inline-block; padding:0.35rem 0.8rem; border-radius:999px;
                 background: rgba(15,118,110,0.12); color:var(--accent-2); font-size:0.82rem; font-weight:700;
                 letter-spacing:0.06em; text-transform:uppercase;">Career Studio</div>
-            <h1 style="margin:0.8rem 0 0.5rem 0; font-size:3rem; line-height:1.05;">
-                Resume analysis with job-fit scoring and clearer guidance.
-            </h1>
-            <p style="font-size:1.05rem; max-width:820px; color:var(--muted); margin:0;">
+            <h1 class="taskoora-wordmark">TASKOORA</h1>
+            <p class="taskoora-subtitle">
                 Upload a resume, paste a job description, and get a richer view of role fit, missing skills,
                 semantic matches, and personalized learning paths.
             </p>
